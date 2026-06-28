@@ -3,7 +3,7 @@ const http = require("http");
 const multer = require("multer");
 const { Server } = require("socket.io");
 const session = require("express-session");
-const Database = require("better-sqlite3");
+const sqlite3 = require("better-sqlite3");
 const db = new Database("database.db");
 
 const app = express();
@@ -25,8 +25,6 @@ app.use(session({
     sameSite: "none"   // required for cross-site (frontend + backend split)
   }
 }));
-
-const db = new sqlite3.Database("./db.sqlite");
 
 /* ===== DB SETUP ===== */
 
