@@ -3,7 +3,8 @@ const http = require("http");
 const multer = require("multer");
 const { Server } = require("socket.io");
 const session = require("express-session");
-const sqlite3 = require("sqlite3").verbose();
+const Database = require("better-sqlite3");
+const db = new Database("database.db");
 
 const app = express();
 const server = http.createServer(app);
