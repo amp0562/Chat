@@ -28,36 +28,36 @@ app.use(session({
 
 /* ===== DB SETUP ===== */
 
-db.run(`
+db.prepare(`
 CREATE TABLE IF NOT EXISTS users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   username TEXT UNIQUE,
   password TEXT,
   avatar TEXT
-)`);
+)`).run();
 
-db.run(`
+db.prepare(`
 CREATE TABLE IF NOT EXISTS messages (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   sender TEXT,
   receiver TEXT,
   text TEXT,
   timestamp INTEGER
-)`); 
+)`).run();
 
-db.run(`
+db.prepare(`
 CREATE TABLE IF NOT EXISTS friends (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user1 TEXT,
   user2 TEXT
-)`);
+)`).run();
 
-db.run(`
+db.prepare(`
 CREATE TABLE IF NOT EXISTS friend_requests (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   sender TEXT,
   receiver TEXT
-)`);
+)`).run();
 
 /* ===== AUTH ===== */
 
@@ -67,13 +67,9 @@ app.get("/me", (req, res) => {
 
   if (!user) return res.json({ user: null });
 
-  db.get(
-    "SELECT username, avatar FROM users WHERE username = ?",
-    [user],
-    (err, row) => {
-      res.json({ user: row });
-    }
-  );
+  const row = db.prepare("SELECT username, avatar FROM users WHERE username = ?").get(user);
+
+  res.json({ user: row });
 });
 
 app.post("/register", (req, res) => {
@@ -81,28 +77,22 @@ app.post("/register", (req, res) => {
 
   const avatar = `https://api.dicebear.com/6.x/initials/svg?seed=${username}`;
 
-  db.run(
-    "INSERT INTO users (username, password, avatar) VALUES (?, ?, ?)",
-    [username, password, avatar],
-    () => res.json({ ok: true })
-  );
+  db.prepare("INSERT INTO users (username, password, avatar) VALUES (?, ?, ?)").run(username, password, avatar);
+
+  res.json({ ok: true });
 });
 
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
 
-  db.get(
-    "SELECT * FROM users WHERE username=? AND password=?",
-    [username, password],
-    (err, row) => {
-      if (row) {
-        req.session.user = username;
-        res.json({ ok: true });
-      } else {
-        res.json({ ok: false });
-      }
-    }
-  );
+  const row = db.prepare("SELECT * FROM users WHERE username=? AND password=?").get(username, password);
+
+  if (row) {
+    req.session.user = username;
+    res.json({ ok: true });
+  } else {
+    res.json({ ok: false });
+  }
 });
 
 app.post("/logout", (req, res) => {
@@ -117,49 +107,34 @@ app.post("/add-friend", (req, res) => {
 
   if (!sender) return res.sendStatus(401);
 
-  db.run(
-    "INSERT INTO friend_requests (sender, receiver) VALUES (?, ?)",
-    [sender, receiver],
-    () => res.json({ ok: true })
-  );
+  db.prepare("INSERT INTO friend_requests (sender, receiver) VALUES (?, ?)").run(sender, receiver);
+
+  res.json({ ok: true });
 });
 
 app.get("/pending", (req, res) => {
   const user = req.session.user;
 
-  db.all(
-    "SELECT sender FROM friend_requests WHERE receiver = ?",
-    [user],
-    (err, rows) => {
-      if (err) return res.json([]);
-      res.json(rows.map(r => r.sender));
-    }
-  );
+  const rows = db.prepare("SELECT sender FROM friend_requests WHERE receiver = ?").all(user);
+
+  res.json(rows.map(r => r.sender));
 });
 
 app.get("/friend-requests", (req, res) => {
   const user = req.session.user;
 
-  db.all(
-    "SELECT * FROM friend_requests WHERE receiver=?",
-    [user],
-    (err, rows) => res.json(rows)
-  );
+  const rows = db.prepare("SELECT * FROM friend_requests WHERE receiver=?").all(user);
+
+  res.json(rows);
 });
 
 app.post("/accept-friend", (req, res) => {
   const user = req.session.user;
   const { sender } = req.body;
 
-  db.run(
-    "INSERT INTO friends (user1, user2) VALUES (?, ?)",
-    [sender, user]
-  );
+  db.prepare("INSERT INTO friends (user1, user2) VALUES (?, ?)").run(sender, user);
 
-  db.run(
-    "DELETE FROM friend_requests WHERE sender=? AND receiver=?",
-    [sender, user]
-  );
+  db.prepare("DELETE FROM friend_requests WHERE sender=? AND receiver=?").run(sender, user);
 
   res.json({ ok: true });
 });
@@ -167,8 +142,8 @@ app.post("/accept-friend", (req, res) => {
 app.get("/friends", (req, res) => {
   const user = req.session.user;
 
-  db.all(
-    `
+  try {
+  const rows = db.prepare(`
     SELECT 
       CASE 
         WHEN f.user1 = ? THEN u2.username 
@@ -185,17 +160,13 @@ app.get("/friends", (req, res) => {
     JOIN users u2 ON f.user2 = u2.username
 
     WHERE f.user1 = ? OR f.user2 = ?
-    `,
-    [user, user, user, user],
-    (err, rows) => {
-      if (err) {
-        console.error(err);
-        return res.sendStatus(500);
-      }
+  `).all(user, user, user, user);
 
-      res.json(rows);
-    }
-  );
+  res.json(rows);
+} catch (err) {
+  console.error(err);
+  res.sendStatus(500);
+}
 });
 
 const storage = multer.diskStorage({
@@ -224,68 +195,49 @@ app.post("/set-avatar", upload.single("avatar"), (req, res) => {
 
   console.log("Saving avatar:", filePath, "for user:", user);
 
-  db.run(
-    "UPDATE users SET avatar = ? WHERE username = ?",
-    [filePath, user],
-    (err) => {
-      if (err) {
-        console.error("DB error:", err);
-        return res.status(500).json({ error: "Database failed" });
-      }
+  try {
+    db.prepare("UPDATE users SET avatar = ? WHERE username = ?").run(filePath, user);
 
-      res.json({
-        ok: true,
-        avatar: filePath
-      });
-    }
-  );
+    res.json({ok: true,avatar: filePath});
+  } catch (err) {
+    console.error("DB error:", err);
+    res.status(500).json({ error: "Database failed" });
+  }
 });
 
 /* ===== MESSAGES ===== */
 
 app.get("/messages", (req, res) => {
-  const user = req.session.user;
-  const withUser = req.query.withUser;
+    const user = req.session.user;
+    const withUser = req.query.withUser;
 
-  db.all(
-    `SELECT messages.*, users.avatar 
+    const rows = db.prepare(`
+    SELECT messages.*, users.avatar 
     FROM messages 
     JOIN users ON users.username = messages.sender
     WHERE (sender=? AND receiver=?) 
-    OR (sender=? AND receiver=?)`,
-    [user, withUser, withUser, user],
-    (err, rows) => res.json(rows)
-  );
+    OR (sender=? AND receiver=?)
+  `).all(user, withUser, withUser, user);
+
+  res.json(rows);
 });
 
 /* ===== SOCKET ===== */
 
 io.on("connection", (socket) => {
   socket.on("sendMessage", (msg) => {
-    db.run(
-      "INSERT INTO messages (sender, receiver, text, timestamp) VALUES (?, ?, ?, ?)",
-      [msg.sender, msg.to, msg.text, Date.now()]
-    );
+    
+    db.prepare("INSERT INTO messages (sender, receiver, text, timestamp) VALUES (?, ?, ?, ?)").run(msg.sender, msg.to, msg.text, Date.now());
 
-    db.get(
-      "SELECT avatar FROM users WHERE username = ?",
-      [msg.sender],
-      (err, row) => {
-        if (err) {
-          console.error("DB error:", err);
-          return;
-        }
+  const row = db.prepare("SELECT avatar FROM users WHERE username = ?").get(msg.sender);
 
-        io.emit("newMessage", {
-          avatar: row ? row.avatar : `https://api.dicebear.com/7.x/initials/svg?seed=${msg.sender}`,
-          sender: msg.sender,
-          receiver: msg.to,
-          text: msg.text,
-          timestamp: Date.now()
-        });
-      });
-    }
-  );
+  io.emit("newMessage", {
+    avatar: row ? row.avatar : `https://api.dicebear.com/7.x/initials/svg?seed=${msg.sender}`,
+    sender: msg.sender,
+    receiver: msg.to,
+    text: msg.text,
+    timestamp: Date.now()
+  });
 });
 
 server.listen(3000, () => console.log("running on 3000"));
