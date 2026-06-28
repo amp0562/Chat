@@ -9,6 +9,7 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
+    "sqlite3": "^6.0.1",
     "express-session": "^1.17.3",
     "express": "^4.19.2",
     "cors": "^2.8.5",
