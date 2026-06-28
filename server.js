@@ -25,6 +25,12 @@ app.use(session({
   }
 }));
 
+const fs = require("fs");
+
+if (!fs.existsSync("uploads")) {
+  fs.mkdirSync("uploads");
+}
+
 const db = new sqlite3.Database("./db.sqlite");
 
 /* ===== DB SETUP ===== */
