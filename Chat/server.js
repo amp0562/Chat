@@ -229,14 +229,15 @@ io.on("connection", (socket) => {
     
     db.prepare("INSERT INTO messages (sender, receiver, text, timestamp) VALUES (?, ?, ?, ?)").run(msg.sender, msg.to, msg.text, Date.now());
 
-  const row = db.prepare("SELECT avatar FROM users WHERE username = ?").get(msg.sender);
+    const row = db.prepare("SELECT avatar FROM users WHERE username = ?").get(msg.sender);
 
-  io.emit("newMessage", {
-    avatar: row ? row.avatar : `https://api.dicebear.com/7.x/initials/svg?seed=${msg.sender}`,
-    sender: msg.sender,
-    receiver: msg.to,
-    text: msg.text,
-    timestamp: Date.now()
+    io.emit("newMessage", {
+      avatar: row ? row.avatar : `https://api.dicebear.com/7.x/initials/svg?seed=${msg.sender}`,
+      sender: msg.sender,
+      receiver: msg.to,
+      text: msg.text,
+      timestamp: Date.now()
+    });
   });
 });
 
