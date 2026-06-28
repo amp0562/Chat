@@ -287,12 +287,12 @@ async function checkAuth() {
 
 function showAuth() {
   document.body.innerHTML = `
-    <div style="padding:40px">
+    <div style="display:flex;height: 100vh;width: 100vh;justify-content:center;align-items: center;flex-direction: column;">
       <h2>Login / Register</h2><br>
-      <input id="user" placeholder="Username"><br><br>
+      <input id="user" placeholder="Username"><br>
       <input id="pass" type="password" placeholder="Password"><br><br>
       <button onclick="register()">Register</button>
-      <button onclick="login()">Login</button>
+      <br><button onclick="login()">Login</button>
     </div>
   `;
 }
