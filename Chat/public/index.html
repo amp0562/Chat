@@ -29,9 +29,9 @@ body {
 
 .sidebarbutton {
   border: none;
-  background: transparent; /* same as parent */
+  background: transparent;
   box-shadow: none;
-  color: #b5bac1; /* slightly dim by default like discord */
+  color: #b5bac1;
   margin-bottom: 5px;
   margin-top: 5px;
   margin-left: -10px;
@@ -42,11 +42,11 @@ body {
   text-align: left;
   cursor: pointer;
   border-radius: 6px;
-  position: relative; /* needed for arrow */
+  position: relative;
 }
 
 .sidebarbutton:hover {
-  background: #3a3d42; /* lighter than background */
+  background: #3a3d42;
   color: white;
 }
 
@@ -331,7 +331,7 @@ async function logout() {
   location.reload();
 }
 
-/* ===== FRIENDS (THIS IS NOW YOUR DM LIST) ===== */
+/* ===== FRIENDS ===== */
 
 async function loadPending() {
   const res = await fetch("/pending");
