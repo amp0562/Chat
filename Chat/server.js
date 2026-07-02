@@ -3,8 +3,11 @@ const http = require("http");
 const multer = require("multer");
 const { Server } = require("socket.io");
 const session = require("express-session");
-const Database = require("better-sqlite3");
-const db = new Database("./Database.db");
+const { Pool } = require("pg");
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
 
 const app = express();
 const server = http.createServer(app);
@@ -14,80 +17,92 @@ app.use(express.json());
 app.use(express.static("public"));
 app.use("/uploads", express.static("uploads"));
 
-app.set("trust proxy", 1); // trust first proxy
+app.set("trust proxy", 1);
 
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: true,      // required on HTTPS (Render uses HTTPS)
-    sameSite: "none"   // required for cross-site (frontend + backend split)
+    secure: true,
+    sameSite: "none"
   }
 }));
 
 /* ===== DB SETUP ===== */
 
-db.prepare(`
-CREATE TABLE IF NOT EXISTS users (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  username TEXT UNIQUE,
-  password TEXT,
-  avatar TEXT
-)`).run();
+(async () => {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id SERIAL PRIMARY KEY,
+      username TEXT UNIQUE,
+      password TEXT,
+      avatar TEXT
+    )
+  `);
 
-db.prepare(`
-CREATE TABLE IF NOT EXISTS messages (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  sender TEXT,
-  receiver TEXT,
-  text TEXT,
-  timestamp INTEGER
-)`).run();
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS messages (
+      id SERIAL PRIMARY KEY,
+      sender TEXT,
+      receiver TEXT,
+      text TEXT,
+      timestamp BIGINT
+    )
+  `);
 
-db.prepare(`
-CREATE TABLE IF NOT EXISTS friends (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  user1 TEXT,
-  user2 TEXT
-)`).run();
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS friends (
+      id SERIAL PRIMARY KEY,
+      user1 TEXT,
+      user2 TEXT
+    )
+  `);
 
-db.prepare(`
-CREATE TABLE IF NOT EXISTS friend_requests (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  sender TEXT,
-  receiver TEXT
-)`).run();
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS friend_requests (
+      id SERIAL PRIMARY KEY,
+      sender TEXT,
+      receiver TEXT
+    )
+  `);
+})();
 
 /* ===== AUTH ===== */
 
-app.get("/me", (req, res) => {
-
+app.get("/me", async (req, res) => {
   const user = req.session.user;
-
   if (!user) return res.json({ user: null });
 
-  const row = db.prepare("SELECT username, avatar FROM users WHERE username = ?").get(user);
+  const { rows } = await pool.query(
+    "SELECT username, avatar FROM users WHERE username = $1",
+    [user]
+  );
 
-  res.json({ user: row });
+  res.json({ user: rows[0] });
 });
 
-app.post("/register", (req, res) => {
+app.post("/register", async (req, res) => {
   const { username, password } = req.body;
-
   const avatar = `https://api.dicebear.com/6.x/initials/svg?seed=${username}`;
 
-  db.prepare("INSERT INTO users (username, password, avatar) VALUES (?, ?, ?)").run(username, password, avatar);
+  await pool.query(
+    "INSERT INTO users (username, password, avatar) VALUES ($1, $2, $3)",
+    [username, password, avatar]
+  );
 
   res.json({ ok: true });
 });
 
-app.post("/login", (req, res) => {
+app.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
-  const row = db.prepare("SELECT * FROM users WHERE username=? AND password=?").get(username, password);
+  const { rows } = await pool.query(
+    "SELECT * FROM users WHERE username=$1 AND password=$2",
+    [username, password]
+  );
 
-  if (row) {
+  if (rows.length) {
     req.session.user = username;
     res.json({ ok: true });
   } else {
@@ -99,18 +114,14 @@ app.post("/logout", (req, res) => {
   req.session.destroy(() => res.json({ ok: true }));
 });
 
-app.get("/debug/db", (req, res) => {
+app.get("/debug/db", async (req, res) => {
   try {
-    const tables = db
-      .prepare("SELECT name FROM sqlite_master WHERE type='table'")
-      .all();
-
+    const tables = ["users", "messages", "friends", "friend_requests"];
     const result = {};
 
     for (const table of tables) {
-      result[table.name] = db
-        .prepare(`SELECT * FROM ${table.name}`)
-        .all();
+      const { rows } = await pool.query(`SELECT * FROM ${table}`);
+      result[table] = rows;
     }
 
     res.json(result);
@@ -122,123 +133,133 @@ app.get("/debug/db", (req, res) => {
 
 /* ===== FRIEND SYSTEM ===== */
 
-app.post("/add-friend", (req, res) => {
+app.post("/add-friend", async (req, res) => {
   const sender = req.session.user;
   const { receiver } = req.body;
 
   if (!sender) return res.sendStatus(401);
 
-  db.prepare("INSERT INTO friend_requests (sender, receiver) VALUES (?, ?)").run(sender, receiver);
+  await pool.query(
+    "INSERT INTO friend_requests (sender, receiver) VALUES ($1, $2)",
+    [sender, receiver]
+  );
 
   res.json({ ok: true });
 });
 
-app.get("/pending", (req, res) => {
+app.get("/pending", async (req, res) => {
   const user = req.session.user;
 
-  const rows = db.prepare("SELECT sender FROM friend_requests WHERE receiver = ?").all(user);
+  const { rows } = await pool.query(
+    "SELECT sender FROM friend_requests WHERE receiver = $1",
+    [user]
+  );
 
   res.json(rows.map(r => r.sender));
 });
 
-app.get("/friend-requests", (req, res) => {
+app.get("/friend-requests", async (req, res) => {
   const user = req.session.user;
 
-  const rows = db.prepare("SELECT * FROM friend_requests WHERE receiver=?").all(user);
+  const { rows } = await pool.query(
+    "SELECT * FROM friend_requests WHERE receiver=$1",
+    [user]
+  );
 
   res.json(rows);
 });
 
-app.post("/accept-friend", (req, res) => {
+app.post("/accept-friend", async (req, res) => {
   const user = req.session.user;
   const { sender } = req.body;
 
-  db.prepare("INSERT INTO friends (user1, user2) VALUES (?, ?)").run(sender, user);
+  await pool.query(
+    "INSERT INTO friends (user1, user2) VALUES ($1, $2)",
+    [sender, user]
+  );
 
-  db.prepare("DELETE FROM friend_requests WHERE sender=? AND receiver=?").run(sender, user);
+  await pool.query(
+    "DELETE FROM friend_requests WHERE sender=$1 AND receiver=$2",
+    [sender, user]
+  );
 
   res.json({ ok: true });
 });
 
-app.get("/friends", (req, res) => {
+app.get("/friends", async (req, res) => {
   const user = req.session.user;
 
   try {
-  const rows = db.prepare(`
-    SELECT 
-      CASE 
-        WHEN f.user1 = ? THEN u2.username 
-        ELSE u1.username 
-      END AS username,
+    const { rows } = await pool.query(`
+      SELECT 
+        CASE 
+          WHEN f.user1 = $1 THEN u2.username 
+          ELSE u1.username 
+        END AS username,
 
-      CASE 
-        WHEN f.user1 = ? THEN u2.avatar 
-        ELSE u1.avatar 
-      END AS avatar
+        CASE 
+          WHEN f.user1 = $1 THEN u2.avatar 
+          ELSE u1.avatar 
+        END AS avatar
 
-    FROM friends f
-    JOIN users u1 ON f.user1 = u1.username
-    JOIN users u2 ON f.user2 = u2.username
+      FROM friends f
+      JOIN users u1 ON f.user1 = u1.username
+      JOIN users u2 ON f.user2 = u2.username
 
-    WHERE f.user1 = ? OR f.user2 = ?
-  `).all(user, user, user, user);
+      WHERE f.user1 = $1 OR f.user2 = $1
+    `, [user]);
 
-  res.json(rows);
-} catch (err) {
-  console.error(err);
-  res.sendStatus(500);
-}
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(500);
+  }
 });
 
+/* ===== UPLOAD ===== */
+
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/");
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
-  }
+  destination: (req, file, cb) => cb(null, "uploads/"),
+  filename: (req, file, cb) =>
+    cb(null, Date.now() + "-" + file.originalname)
 });
 
 const upload = multer({ storage });
 
-app.post("/set-avatar", upload.single("avatar"), (req, res) => {
+app.post("/set-avatar", upload.single("avatar"), async (req, res) => {
   const user = req.session.user;
 
-  if (!user) {
-    return res.status(401).json({ error: "Not logged in" });
-  }
-
-  if (!req.file) {
-    return res.status(400).json({ error: "No file uploaded" });
-  }
+  if (!user) return res.status(401).json({ error: "Not logged in" });
+  if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
   const filePath = "/uploads/" + req.file.filename;
 
-  console.log("Saving avatar:", filePath, "for user:", user);
-
   try {
-    db.prepare("UPDATE users SET avatar = ? WHERE username = ?").run(filePath, user);
+    await pool.query(
+      "UPDATE users SET avatar = $1 WHERE username = $2",
+      [filePath, user]
+    );
 
-    res.json({ok: true,avatar: filePath});
+    res.json({ ok: true, avatar: filePath });
   } catch (err) {
-    console.error("DB error:", err);
+    console.error(err);
     res.status(500).json({ error: "Database failed" });
   }
 });
 
 /* ===== MESSAGES ===== */
 
-app.get("/messages", (req, res) => {
-    const user = req.session.user;
-    const withUser = req.query.withUser;
+app.get("/messages", async (req, res) => {
+  const user = req.session.user;
+  const withUser = req.query.withUser;
 
-    const rows = db.prepare(`
+  const { rows } = await pool.query(`
     SELECT messages.*, users.avatar 
     FROM messages 
     JOIN users ON users.username = messages.sender
-    WHERE (sender=? AND receiver=?) 
-    OR (sender=? AND receiver=?)
-  `).all(user, withUser, withUser, user);
+    WHERE (sender=$1 AND receiver=$2) 
+       OR (sender=$2 AND receiver=$1)
+  `, [user, withUser]);
 
   res.json(rows);
 });
@@ -246,14 +267,20 @@ app.get("/messages", (req, res) => {
 /* ===== SOCKET ===== */
 
 io.on("connection", (socket) => {
-  socket.on("sendMessage", (msg) => {
-    
-    db.prepare("INSERT INTO messages (sender, receiver, text, timestamp) VALUES (?, ?, ?, ?)").run(msg.sender, msg.to, msg.text, Date.now());
+  socket.on("sendMessage", async (msg) => {
 
-    const row = db.prepare("SELECT avatar FROM users WHERE username = ?").get(msg.sender);
+    await pool.query(
+      "INSERT INTO messages (sender, receiver, text, timestamp) VALUES ($1, $2, $3, $4)",
+      [msg.sender, msg.to, msg.text, Date.now()]
+    );
+
+    const { rows } = await pool.query(
+      "SELECT avatar FROM users WHERE username = $1",
+      [msg.sender]
+    );
 
     io.emit("newMessage", {
-      avatar: row ? row.avatar : `https://api.dicebear.com/7.x/initials/svg?seed=${msg.sender}`,
+      avatar: rows[0]?.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${msg.sender}`,
       sender: msg.sender,
       receiver: msg.to,
       text: msg.text,
