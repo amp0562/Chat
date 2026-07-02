@@ -4,7 +4,7 @@ const multer = require("multer");
 const { Server } = require("socket.io");
 const session = require("express-session");
 const Database = require("better-sqlite3");
-const db = new Database("./Data/Database.db");
+const db = new Database("./Database.db");
 
 const app = express();
 const server = http.createServer(app);
