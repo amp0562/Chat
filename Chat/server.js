@@ -177,25 +177,22 @@ app.get("/avatar/:username", async (req, res) => {
     );
 
     if (!rows.length || !rows[0].avatar) {
-      return res.sendStatus(404);
+      return res.redirect(`https://api.dicebear.com/7.x/initials/svg?seed=${username}`);
     }
 
     const avatar = rows[0].avatar;
 
-    if (Buffer.isBuffer(avatar)) {
+    if (typeof avatar !== "string") {
       res.set("Content-Type", "image/png");
       return res.send(avatar);
     }
-    
-    if (typeof avatar === "string") {
-      if (avatar.startsWith("/uploads/")) {
-        return res.redirect(`https://api.dicebear.com/7.x/initials/svg?seed=${username}`);
-      }
 
-      return res.redirect(avatar);
+    if (avatar.startsWith("/uploads/")) {
+      return res.redirect(`https://api.dicebear.com/7.x/initials/svg?seed=${username}`);
     }
 
-    res.sendStatus(404);
+    return res.redirect(avatar);
+
   } catch (err) {
     console.error(err);
     res.sendStatus(500);
