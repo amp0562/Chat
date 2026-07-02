@@ -4,6 +4,7 @@ const multer = require("multer");
 const { Server } = require("socket.io");
 const session = require("express-session");
 const { Pool } = require("pg");
+const sharp = require("sharp");
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -158,7 +159,7 @@ app.get("/avatar/:username", async (req, res) => {
 
     // DB image
     if (typeof avatar !== "string") {
-      res.set("Content-Type", "image/png");
+      res.set("Content-Type", "image/webp");
       return res.send(avatar);
     }
 
@@ -273,9 +274,14 @@ app.post("/set-avatar", upload.single("avatar"), async (req, res) => {
     if (!user) return res.status(401).json({ error: "Not logged in" });
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
+    const compressed = await sharp(req.file.buffer)
+      .resize(128, 128, { fit: "cover" })
+      .webp({ quality: 60 })
+      .toBuffer();
+
     await pool.query(
       "UPDATE users SET avatar = $1 WHERE username = $2",
-      [req.file.buffer, user]
+      [compressed, user]
     );
 
     res.json({ ok: true });
