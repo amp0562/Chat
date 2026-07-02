@@ -29,13 +29,6 @@ app.use(session({
   }
 }));
 
-/* ===== HELPER ===== */
-
-function bufferToImage(buffer) {
-  if (!buffer) return null;
-  return `data:image/png;base64,${buffer.toString("base64")}`;
-}
-
 /* ===== DB SETUP ===== */
 
 (async () => {
@@ -82,14 +75,18 @@ app.get("/me", async (req, res) => {
   if (!user) return res.json({ user: null });
 
   const { rows } = await pool.query(
-    "SELECT username, avatar FROM users WHERE username = $1",
+    "SELECT username FROM users WHERE username = $1",
     [user]
   );
 
-  const u = rows[0];
-  if (u && u.avatar) u.avatar = bufferToImage(u.avatar);
+  if (!rows.length) return res.json({ user: null });
 
-  res.json({ user: u });
+  res.json({
+    user: {
+      username: rows[0].username,
+      avatar: `/avatar/${rows[0].username}`
+    }
+  });
 });
 
 app.post("/register", async (req, res) => {
@@ -123,6 +120,8 @@ app.post("/logout", (req, res) => {
   req.session.destroy(() => res.json({ ok: true }));
 });
 
+/* ===== DEBUG ===== */
+
 app.get("/debug/db", async (req, res) => {
   try {
     const tables = ["users", "messages", "friends", "friend_requests"];
@@ -137,6 +136,43 @@ app.get("/debug/db", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.send("error");
+  }
+});
+
+/* ===== AVATAR ROUTE (SINGLE SOURCE OF TRUTH) ===== */
+
+app.get("/avatar/:username", async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    const { rows } = await pool.query(
+      "SELECT avatar FROM users WHERE username = $1",
+      [username]
+    );
+
+    if (!rows.length || !rows[0].avatar) {
+      return res.redirect(`https://api.dicebear.com/7.x/initials/svg?seed=${username}`);
+    }
+
+    const avatar = rows[0].avatar;
+
+    // DB image
+    if (typeof avatar !== "string") {
+      res.set("Content-Type", "image/png");
+      return res.send(avatar);
+    }
+
+    // old uploads path
+    if (avatar.startsWith("/uploads/")) {
+      return res.redirect(avatar);
+    }
+
+    // external URL (dicebear etc)
+    return res.redirect(avatar);
+
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(500);
   }
 });
 
@@ -165,38 +201,6 @@ app.get("/pending", async (req, res) => {
   );
 
   res.json(rows.map(r => r.sender));
-});
-
-app.get("/avatar/:username", async (req, res) => {
-  const { username } = req.params;
-
-  try {
-    const { rows } = await pool.query(
-      "SELECT avatar FROM users WHERE username = $1",
-      [username]
-    );
-
-    if (!rows.length || !rows[0].avatar) {
-      return res.redirect(`https://api.dicebear.com/7.x/initials/svg?seed=${username}`);
-    }
-
-    const avatar = rows[0].avatar;
-
-    if (typeof avatar !== "string") {
-      res.set("Content-Type", "image/png");
-      return res.send(avatar);
-    }
-
-    if (avatar.startsWith("/uploads/")) {
-      return res.redirect(`https://api.dicebear.com/7.x/initials/svg?seed=${username}`);
-    }
-
-    return res.redirect(avatar);
-
-  } catch (err) {
-    console.error(err);
-    res.sendStatus(500);
-  }
 });
 
 app.get("/friend-requests", async (req, res) => {
@@ -236,23 +240,16 @@ app.get("/friends", async (req, res) => {
         CASE 
           WHEN f.user1 = $1 THEN u2.username 
           ELSE u1.username 
-        END AS username,
-
-        CASE 
-          WHEN f.user1 = $1 THEN u2.avatar 
-          ELSE u1.avatar 
-        END AS avatar
-
+        END AS username
       FROM friends f
       JOIN users u1 ON f.user1 = u1.username
       JOIN users u2 ON f.user2 = u2.username
-
       WHERE f.user1 = $1 OR f.user2 = $1
     `, [user]);
 
     const fixed = rows.map(r => ({
-      ...r,
-      avatar: bufferToImage(r.avatar)
+      username: r.username,
+      avatar: `/avatar/${r.username}`
     }));
 
     res.json(fixed);
@@ -266,7 +263,7 @@ app.get("/friends", async (req, res) => {
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 2 * 1024 * 1024 } // 2MB max
+  limits: { fileSize: 2 * 1024 * 1024 }
 });
 
 app.post("/set-avatar", upload.single("avatar"), async (req, res) => {
@@ -296,7 +293,7 @@ app.get("/messages", async (req, res) => {
   const withUser = req.query.withUser;
 
   const { rows } = await pool.query(`
-    SELECT messages.*, users.avatar 
+    SELECT messages.*, users.username as senderName
     FROM messages 
     JOIN users ON users.username = messages.sender
     WHERE (sender=$1 AND receiver=$2) 
@@ -305,7 +302,7 @@ app.get("/messages", async (req, res) => {
 
   const fixed = rows.map(r => ({
     ...r,
-    avatar: bufferToImage(r.avatar)
+    avatar: `/avatar/${r.sender}`
   }));
 
   res.json(fixed);
@@ -321,13 +318,8 @@ io.on("connection", (socket) => {
       [msg.sender, msg.to, msg.text, Date.now()]
     );
 
-    const { rows } = await pool.query(
-      "SELECT avatar FROM users WHERE username = $1",
-      [msg.sender]
-    );
-
     io.emit("newMessage", {
-      avatar: bufferToImage(rows[0]?.avatar) || `https://api.dicebear.com/7.x/initials/svg?seed=${msg.sender}`,
+      avatar: `/avatar/${msg.sender}`,
       sender: msg.sender,
       receiver: msg.to,
       text: msg.text,
