@@ -188,6 +188,10 @@ app.get("/avatar/:username", async (req, res) => {
     }
     
     if (typeof avatar === "string") {
+      if (avatar.startsWith("/uploads/")) {
+        return res.redirect(`https://api.dicebear.com/7.x/initials/svg?seed=${username}`);
+      }
+
       return res.redirect(avatar);
     }
 
