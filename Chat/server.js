@@ -263,7 +263,10 @@ app.get("/friends", async (req, res) => {
 
 /* ===== UPLOAD ===== */
 
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 2 * 1024 * 1024 } // 2MB max
+});
 
 app.post("/set-avatar", upload.single("avatar"), async (req, res) => {
   const user = req.session.user;
