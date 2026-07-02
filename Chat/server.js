@@ -29,6 +29,13 @@ app.use(session({
   }
 }));
 
+/* ===== HELPER ===== */
+
+function bufferToImage(buffer) {
+  if (!buffer) return null;
+  return `data:image/png;base64,${buffer.toString("base64")}`;
+}
+
 /* ===== DB SETUP ===== */
 
 (async () => {
@@ -37,7 +44,7 @@ app.use(session({
       id SERIAL PRIMARY KEY,
       username TEXT UNIQUE,
       password TEXT,
-      avatar TEXT
+      avatar BYTEA
     )
   `);
 
@@ -79,16 +86,18 @@ app.get("/me", async (req, res) => {
     [user]
   );
 
-  res.json({ user: rows[0] });
+  const u = rows[0];
+  if (u && u.avatar) u.avatar = bufferToImage(u.avatar);
+
+  res.json({ user: u });
 });
 
 app.post("/register", async (req, res) => {
   const { username, password } = req.body;
-  const avatar = `https://api.dicebear.com/6.x/initials/svg?seed=${username}`;
 
   await pool.query(
     "INSERT INTO users (username, password, avatar) VALUES ($1, $2, $3)",
-    [username, password, avatar]
+    [username, password, null]
   );
 
   res.json({ ok: true });
@@ -209,7 +218,12 @@ app.get("/friends", async (req, res) => {
       WHERE f.user1 = $1 OR f.user2 = $1
     `, [user]);
 
-    res.json(rows);
+    const fixed = rows.map(r => ({
+      ...r,
+      avatar: bufferToImage(r.avatar)
+    }));
+
+    res.json(fixed);
   } catch (err) {
     console.error(err);
     res.sendStatus(500);
@@ -218,13 +232,7 @@ app.get("/friends", async (req, res) => {
 
 /* ===== UPLOAD ===== */
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "uploads/"),
-  filename: (req, file, cb) =>
-    cb(null, Date.now() + "-" + file.originalname)
-});
-
-const upload = multer({ storage });
+const upload = multer({ storage: multer.memoryStorage() });
 
 app.post("/set-avatar", upload.single("avatar"), async (req, res) => {
   const user = req.session.user;
@@ -232,19 +240,12 @@ app.post("/set-avatar", upload.single("avatar"), async (req, res) => {
   if (!user) return res.status(401).json({ error: "Not logged in" });
   if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
-  const filePath = "/uploads/" + req.file.filename;
+  await pool.query(
+    "UPDATE users SET avatar = $1 WHERE username = $2",
+    [req.file.buffer, user]
+  );
 
-  try {
-    await pool.query(
-      "UPDATE users SET avatar = $1 WHERE username = $2",
-      [filePath, user]
-    );
-
-    res.json({ ok: true, avatar: filePath });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Database failed" });
-  }
+  res.json({ ok: true });
 });
 
 /* ===== MESSAGES ===== */
@@ -261,7 +262,12 @@ app.get("/messages", async (req, res) => {
        OR (sender=$2 AND receiver=$1)
   `, [user, withUser]);
 
-  res.json(rows);
+  const fixed = rows.map(r => ({
+    ...r,
+    avatar: bufferToImage(r.avatar)
+  }));
+
+  res.json(fixed);
 });
 
 /* ===== SOCKET ===== */
@@ -280,7 +286,7 @@ io.on("connection", (socket) => {
     );
 
     io.emit("newMessage", {
-      avatar: rows[0]?.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${msg.sender}`,
+      avatar: bufferToImage(rows[0]?.avatar) || `https://api.dicebear.com/7.x/initials/svg?seed=${msg.sender}`,
       sender: msg.sender,
       receiver: msg.to,
       text: msg.text,
