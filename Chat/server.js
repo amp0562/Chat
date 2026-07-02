@@ -167,6 +167,37 @@ app.get("/pending", async (req, res) => {
   res.json(rows.map(r => r.sender));
 });
 
+app.get("/avatar/:username", async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    const { rows } = await pool.query(
+      "SELECT avatar FROM users WHERE username = $1",
+      [username]
+    );
+
+    if (!rows.length || !rows[0].avatar) {
+      return res.sendStatus(404);
+    }
+
+    const avatar = rows[0].avatar;
+
+    if (Buffer.isBuffer(avatar)) {
+      res.set("Content-Type", "image/png");
+      return res.send(avatar);
+    }
+    
+    if (typeof avatar === "string") {
+      return res.redirect(avatar);
+    }
+
+    res.sendStatus(404);
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(500);
+  }
+});
+
 app.get("/friend-requests", async (req, res) => {
   const user = req.session.user;
 
