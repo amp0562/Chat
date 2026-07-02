@@ -279,7 +279,7 @@ async function checkAuth() {
     showAuth();
   } else {
     currentUser = data.user.username;
-    avatar = data.user.avatar;
+    avatar = `/avatar/${data.user.username}`; // CHANGED
     document.getElementById("app").style.display = "flex";
     startApp();
   }
