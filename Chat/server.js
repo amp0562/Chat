@@ -99,6 +99,27 @@ app.post("/logout", (req, res) => {
   req.session.destroy(() => res.json({ ok: true }));
 });
 
+app.get("/debug/db", (req, res) => {
+  try {
+    const tables = db
+      .prepare("SELECT name FROM sqlite_master WHERE type='table'")
+      .all();
+
+    const result = {};
+
+    for (const table of tables) {
+      result[table.name] = db
+        .prepare(`SELECT * FROM ${table.name}`)
+        .all();
+    }
+
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.send("error");
+  }
+});
+
 /* ===== FRIEND SYSTEM ===== */
 
 app.post("/add-friend", (req, res) => {
