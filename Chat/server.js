@@ -318,6 +318,13 @@ io.on("connection", (socket) => {
       [msg.sender, msg.to, msg.text, Date.now()]
     );
 
+    const WEEK = 6.048e+8;
+
+    await pool.query(
+      "DELETE FROM messages WHERE timestamp < $1",
+      [Date.now() - WEEK]
+    );
+
     io.emit("newMessage", {
       avatar: `/avatar/${msg.sender}`,
       sender: msg.sender,
