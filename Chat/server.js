@@ -269,17 +269,23 @@ const upload = multer({
 });
 
 app.post("/set-avatar", upload.single("avatar"), async (req, res) => {
-  const user = req.session.user;
+  try {
+    const user = req.session.user;
 
-  if (!user) return res.status(401).json({ error: "Not logged in" });
-  if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+    if (!user) return res.status(401).json({ error: "Not logged in" });
+    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
-  await pool.query(
-    "UPDATE users SET avatar = $1 WHERE username = $2",
-    [req.file.buffer, user]
-  );
+    await pool.query(
+      "UPDATE users SET avatar = $1 WHERE username = $2",
+      [req.file.buffer, user]
+    );
 
-  res.json({ ok: true });
+    res.json({ ok: true });
+
+  } catch (err) {
+    console.error("UPLOAD ERROR:", err);
+    res.status(500).json({ error: "Upload failed" });
+  }
 });
 
 /* ===== MESSAGES ===== */
