@@ -121,25 +121,6 @@ app.post("/logout", (req, res) => {
   req.session.destroy(() => res.json({ ok: true }));
 });
 
-/* ===== DEBUG ===== */
-
-app.get("/debug/db", async (req, res) => {
-  try {
-    const tables = ["users", "messages", "friends", "friend_requests"];
-    const result = {};
-
-    for (const table of tables) {
-      const { rows } = await pool.query(`SELECT * FROM ${table}`);
-      result[table] = rows;
-    }
-
-    res.json(result);
-  } catch (err) {
-    console.error(err);
-    res.send("error");
-  }
-});
-
 /* ===== AVATAR ROUTE (SINGLE SOURCE OF TRUTH) ===== */
 
 app.get("/avatar/:username", async (req, res) => {
