@@ -132,9 +132,9 @@ html.hide-timestamps .message-time { display: none !important; }
 html.reduce-motion *, html.reduce-motion *::before, html.reduce-motion *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
 .message-text { color: #d8dbe2; white-space: pre-wrap; overflow-wrap: anywhere; }
 .message.compact { padding-top: 2px; padding-bottom: 2px; }
-.message.compact .avatar { visibility: hidden; }
+.message.compact .avatar { display: none; }
 .message.compact .message-meta { display: none; }
-.message.compact .message-text { padding-top: 1px; }
+.message.compact .message-text { padding-top: 0; line-height: 1.35; }
 .empty-state {
   height: 100%; min-height: 240px; display: flex; flex-direction: column;
   align-items: center; justify-content: center; text-align: center; color: var(--muted);
