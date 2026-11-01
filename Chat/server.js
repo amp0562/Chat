@@ -278,6 +278,7 @@ app.post("/set-avatar", upload.single("avatar"), async (req, res) => {
 app.get("/messages", async (req, res) => {
   const user = req.session.user;
   const withUser = req.query.withUser;
+  const WEEK = 7 * 24 * 60 * 60 * 1000;
 
   const { rows } = await pool.query(`
     SELECT messages.*, users.username as senderName
@@ -285,7 +286,8 @@ app.get("/messages", async (req, res) => {
     JOIN users ON users.username = messages.sender
     WHERE (sender=$1 AND receiver=$2) 
        OR (sender=$2 AND receiver=$1)
-  `, [user, withUser]);
+       AND messages.timestamp >= $3
+  `, [user, withUser, Date.now() - WEEK]);
 
   const fixed = rows.map(r => ({
     ...r,
@@ -304,8 +306,8 @@ io.on("connection", (socket) => {
       "INSERT INTO messages (sender, receiver, text, timestamp) VALUES ($1, $2, $3, $4)",
       [msg.sender, msg.to, msg.text, Date.now()]
     );
-
-    const WEEK = 6.048e+8;
+    
+    const WEEK = 7 * 24 * 60 * 60 * 1000;
 
     await pool.query(
       "DELETE FROM messages WHERE timestamp < $1",
