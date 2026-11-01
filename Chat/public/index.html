@@ -16,8 +16,8 @@
   --text: #eef0f4;
   --muted: #858c99;
   --soft: #b7bdc8;
-  --accent: #9b8cff;
-  --accent-hover: #ad9fff;
+  --accent: #a99b83;
+  --accent-hover: #b9aa91;
   --danger: #f06b78;
   --radius: 13px;
 }
@@ -73,7 +73,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
   transition: background .15s, color .15s;
 }
 .side-action:hover, .side-action.active { background: var(--panel-3); color: var(--text); }
-.side-action.active { box-shadow: inset 2px 0 var(--accent); }
+.side-action.active { box-shadow: inset 2px 0 #a99b83; }
 .side-icon { width: 20px; text-align: center; color: var(--muted); font-size: 16px; }
 #dmList { display: flex; flex-direction: column; gap: 3px; overflow-y: auto; }
 .dm {
@@ -82,7 +82,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
   cursor: pointer; color: var(--soft); transition: background .15s;
 }
 .dm:hover { background: #20232a; }
-.dm.active { background: #292638; color: var(--text); }
+.dm.active { background: #292822; color: var(--text); }
 .dm .avatar { width: 34px; height: 34px; margin: 0; flex: 0 0 auto; }
 .dm-name { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-weight: 550; }
 .sidebar-spacer { flex: 1; }
@@ -136,7 +136,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 }
 .empty-symbol {
   width: 58px; height: 58px; border-radius: 18px; display: grid; place-items: center;
-  background: #211f31; color: #b6aaff; font-size: 25px; margin-bottom: 16px;
+  background: #292822; color: #c4b79f; font-size: 25px; margin-bottom: 16px;
 }
 .empty-state h2 { color: var(--text); font-size: 18px; margin: 0 0 5px; }
 .empty-state p { max-width: 290px; margin: 0; }
@@ -144,8 +144,8 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 .inputBar {
   display: none; align-items: flex-end; gap: 10px; width: min(900px, 100%);
   margin: 0 auto; padding: 9px 10px 9px 16px;
-  background: #1b1e24; border: 1px solid #303540; border-radius: 14px;
-  box-shadow: 0 8px 30px #00000020;
+  background: #1b1e24; border: 1px solid #303540; border-radius: 8px;
+  box-shadow: none;
 }
 .inputBar:focus-within { border-color: #7468bb; }
 .inputBar textarea {
@@ -189,29 +189,49 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 #pendingList .dm button:hover { background: #3a3359; }
 .logoutbutton { display: none; }
 .auth-screen {
-  min-height: 100vh; display: grid; place-items: center; padding: 24px;
-  background: radial-gradient(ellipse at 50% 5%, #292340 0, #15151d 42%, #101114 78%);
+  min-height: 100vh; display: grid; place-items: center; padding: 28px;
+  background: #111214;
 }
 .auth-card {
-  width: min(390px, 100%); padding: 34px; border: 1px solid #30303d;
-  border-radius: 19px; background: #191a22; box-shadow: 0 24px 90px #0008;
+  width: min(420px, 100%); padding: 38px 40px 34px;
+  border: 1px solid #303137; border-radius: 10px;
+  background: #17181b; box-shadow: none;
 }
-.auth-brand { display: flex; justify-content: center; margin-bottom: 22px; }
-.auth-card h1 { text-align: center; font-size: 23px; margin: 0 0 6px; letter-spacing: -.7px; }
-.auth-card > p { text-align: center; color: var(--muted); margin: 0 0 25px; }
+.auth-brand {
+  display: block; margin-bottom: 42px; text-align: left;
+  color: #eeeae2; font-size: 25px; font-weight: 700; letter-spacing: -1.2px;
+}
+.auth-brand::after {
+  content: " / private conversations";
+  color: #777a80; font-size: 12px; font-weight: 400; letter-spacing: 0;
+}
+.auth-brand .brand-mark { display: none; }
+.auth-card h1 {
+  text-align: left; font-size: 24px; font-weight: 650;
+  margin: 0 0 7px; letter-spacing: -.7px;
+}
+.auth-card > p {
+  text-align: left; color: #92949a; margin: 0 0 28px;
+}
 .auth-card input {
-  width: 100%; padding: 12px 13px; margin-bottom: 11px; border-radius: 9px;
-  border: 1px solid #343743; background: #111319; color: var(--text); outline: 0;
+  width: 100%; padding: 13px 12px; margin-bottom: 12px;
+  border-radius: 6px; border: 1px solid #383a40;
+  background: #111214; color: var(--text); outline: 0;
 }
-.auth-card input:focus { border-color: #8174d1; }
+.auth-card input:focus { border-color: #a99b83; }
 .auth-card button {
-  width: 100%; padding: 12px; margin-top: 9px; border-radius: 9px;
-  border: 1px solid transparent; background: var(--accent); color: #171522;
-  font-weight: 750; cursor: pointer;
+  width: 100%; padding: 12px; margin-top: 10px; border-radius: 6px;
+  border: 1px solid #b7a98f; background: #b7a98f; color: #171613;
+  font-weight: 650; cursor: pointer;
 }
-.auth-card button.secondary { background: #252832; color: var(--soft); border-color: #363a45; }
-.auth-card button:hover { filter: brightness(1.08); }
-.auth-error { min-height: 18px; color: var(--danger); font-size: 12px; text-align: center; margin-top: 12px; }
+.auth-card button.secondary {
+  background: transparent; color: #c6c4be; border-color: #3b3d42;
+}
+.auth-card button:hover { filter: brightness(1.06); }
+.auth-error {
+  min-height: 18px; color: var(--danger); font-size: 12px;
+  text-align: left; margin-top: 15px;
+}
 .avatar { object-fit: cover; border-radius: 50%; background: #282b35; }
 #avatarInput { display: none; }
 @media (max-width: 700px) {
@@ -231,7 +251,6 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 }
 @media (max-width: 420px) {
   .sidebar { width: 62px; min-width: 62px; padding-left: 6px; padding-right: 6px; }
-  .brand-mark { width: 31px; height: 31px; }
   .header-actions { display: none; }
 }
 </style>
@@ -240,10 +259,10 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 <div id="app" style="display:none;">
   <aside class="sidebar">
     <div class="brand">
-      <div class="brand-mark">v</div>
+      
       <div class="brand-copy">
         <div class="brand-name">voxa</div>
-        <div class="brand-sub">just between us</div>
+        <div class="brand-sub">private conversations</div>
       </div>
     </div>
 
@@ -278,9 +297,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
           <div class="header-subtitle" id="chatSubtitle">Select a conversation to get started</div>
         </div>
       </div>
-      <div class="header-actions">
-        <button class="icon-button" title="Messages are private">⌑</button>
-      </div>
+
     </header>
 
     <section class="dmView" id="dmView" style="display:flex;">
@@ -344,13 +361,13 @@ function showAuth(error = "") {
   document.body.innerHTML = `
     <main class="auth-screen">
       <section class="auth-card">
-        <div class="auth-brand"><div class="brand-mark">v</div></div>
-        <h1>Welcome to Voxa</h1>
-        <p>A quieter place for your conversations.</p>
+        <div class="auth-brand">voxa</div>
+        <h1>Sign in</h1>
+        <p>Your conversations, without the noise.</p>
         <input id="user" placeholder="Username" autocomplete="username">
         <input id="pass" type="password" placeholder="Password" autocomplete="current-password">
-        <button onclick="login()">Log in</button>
-        <button class="secondary" onclick="register()">Create account</button>
+        <button onclick="login()">Continue</button>
+        <button class="secondary" onclick="register()">Create an account</button>
         <div class="auth-error" id="authError">${error}</div>
       </section>
     </main>
