@@ -286,15 +286,74 @@ async function checkAuth() {
 }
 
 function showAuth() {
-  document.body.innerHTML = `
-    <div style="display:flex;height: 100vh;width: 100vw;justify-content:center;align-items: center;flex-direction: column;">
-      <h2>Login / Register</h2><br>
-      <input id="user" placeholder="Username"><br>
-      <input id="pass" type="password" placeholder="Password"><br><br>
-      <button onclick="register()">Register</button>
-      <br><button onclick="login()">Login</button>
+  ```js
+document.body.innerHTML = `
+  <div style="
+    display: flex;
+    min-height: 100vh;
+    justify-content: center;
+    align-items: center;
+    background: #0d1117;
+    font-family: Arial, sans-serif;
+    color: #e6edf3;
+  ">
+    <div style="
+      width: 320px;
+      padding: 35px;
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    ">
+      <div style="text-align: center; margin-bottom: 10px;">
+        <h2 style="margin: 0 0 8px;">Welcome back</h2>
+        <p style="margin: 0; color: #8b949e; font-size: 14px;">
+          Login or create an account
+        </p>
+      </div>
+
+      <input id="user" placeholder="Username" style="
+        padding: 13px;
+        border-radius: 7px;
+        border: 1px solid #30363d;
+        background: #0d1117;
+        color: white;
+        outline: none;
+      ">
+
+      <input id="pass" type="password" placeholder="Password" style="
+        padding: 13px;
+        border-radius: 7px;
+        border: 1px solid #30363d;
+        background: #0d1117;
+        color: white;
+        outline: none;
+      ">
+
+      <button onclick="login()" style="
+        padding: 12px;
+        background: #238636;
+        color: white;
+        border: none;
+        border-radius: 7px;
+        cursor: pointer;
+        font-weight: bold;
+      ">Login</button>
+
+      <button onclick="register()" style="
+        padding: 12px;
+        background: #21262d;
+        color: #e6edf3;
+        border: 1px solid #30363d;
+        border-radius: 7px;
+        cursor: pointer;
+      ">Create account</button>
     </div>
-  `;
+  </div>
+`;
+```
 }
 
 async function register() {
