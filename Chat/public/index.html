@@ -1,268 +1,320 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Chat</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101114">
+<title>Voxa</title>
 <style>
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: sans-serif;
+:root {
+  color-scheme: dark;
+  --bg: #101114;
+  --panel: #15171c;
+  --panel-2: #1b1e24;
+  --panel-3: #22262e;
+  --line: #292d36;
+  --text: #eef0f4;
+  --muted: #858c99;
+  --soft: #b7bdc8;
+  --accent: #9b8cff;
+  --accent-hover: #ad9fff;
+  --danger: #f06b78;
+  --radius: 13px;
 }
-
+* { box-sizing: border-box; }
+html, body { width: 100%; height: 100%; margin: 0; }
 body {
-  background: #313338;
-  color: #fff;
-  height: 100vh;
-  display: flex;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font: 14px/1.45 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
-
-/* LEFT BAR */
+button, input, textarea { font: inherit; }
+button { color: inherit; }
+button:focus-visible, input:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+#app { display: flex; width: 100%; height: 100%; min-width: 0; }
 .sidebar {
-  width: 260px;
-  background: #2b2d31;
-  padding: 10px;
-}
-
-.sidebarbutton {
-  border: none;
-  background: transparent;
-  box-shadow: none;
-  color: #b5bac1;
-  margin-bottom: 5px;
-  margin-top: 5px;
-  margin-left: -10px;
-  margin-right: -10px;
-  padding-left: 10px;
-  width: calc(100% + 20px);
-  height: 50px;
-  text-align: left;
-  cursor: pointer;
-  border-radius: 6px;
-  position: relative;
-}
-
-.sidebarbutton:hover {
-  background: #3a3d42;
-  color: white;
-}
-
-.sidebarbutton::after {
-  content: ">";
-  position: absolute;
-  transform: translateY(-125%);
-  right: 10px;
-  opacity: 0;
-  transition: 0.2s;
-}
-
-.sidebarbutton:hover::after {
-  opacity: 1;
-}
-
-.sidebarheader {
+  width: 292px;
+  min-width: 250px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px;
-  background: #2b2d31;
-  border-bottom: 1px solid #1e1f22;
+  flex-direction: column;
+  padding: 20px 14px 14px;
+  background: #14161a;
+  border-right: 1px solid var(--line);
 }
-
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 0 9px 23px;
+}
+.brand-mark {
+  width: 34px; height: 34px; border-radius: 11px;
+  display: grid; place-items: center;
+  color: #171522; font-weight: 900; font-size: 18px;
+  background: linear-gradient(145deg, #c0b5ff, #8270ee);
+  box-shadow: 0 5px 20px #8d7af02b;
+}
+.brand-name { font-size: 17px; font-weight: 750; letter-spacing: -.5px; }
+.brand-sub { color: var(--muted); font-size: 11px; margin-top: -2px; }
+.side-section { margin-top: 8px; }
+.section-label {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 9px 10px 8px; color: #777f8d; font-size: 10px;
+  font-weight: 750; letter-spacing: 1.15px; text-transform: uppercase;
+}
+.side-action {
+  width: 100%; border: 0; border-radius: 9px; padding: 10px;
+  background: transparent; color: var(--soft); text-align: left;
+  display: flex; align-items: center; gap: 11px; cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.side-action:hover, .side-action.active { background: var(--panel-3); color: var(--text); }
+.side-action.active { box-shadow: inset 2px 0 var(--accent); }
+.side-icon { width: 20px; text-align: center; color: var(--muted); font-size: 16px; }
+#dmList { display: flex; flex-direction: column; gap: 3px; overflow-y: auto; }
 .dm {
-  display: flex;
-  align-items: center;
-  padding: 8px;
-  border-radius: 6px;
-  cursor: pointer;
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; min-height: 53px; border-radius: 9px;
+  cursor: pointer; color: var(--soft); transition: background .15s;
 }
-
-.dm:hover {
-  background: #3f4147;
+.dm:hover { background: #20232a; }
+.dm.active { background: #292638; color: var(--text); }
+.dm .avatar { width: 34px; height: 34px; margin: 0; flex: 0 0 auto; }
+.dm-name { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-weight: 550; }
+.sidebar-spacer { flex: 1; }
+.profile {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 9px 3px; border-top: 1px solid var(--line);
 }
-
-.dm.active {
-  background: #404249;
+.profile .avatar { width: 36px; height: 36px; margin: 0; cursor: pointer; }
+.profile-info { min-width: 0; flex: 1; }
+.profile-name { font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.profile-hint { color: var(--muted); font-size: 11px; }
+.icon-button {
+  width: 34px; height: 34px; border: 0; border-radius: 9px;
+  background: transparent; color: var(--muted); cursor: pointer;
 }
-
-.avatar {
-  width: 32px;
-  height: 32px;
-  background: transparent;
-  border-radius: 50%;
-  margin-right: 10px;
-}
-
-/* CHAT AREA */
-.chat {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
+.icon-button:hover { background: var(--panel-3); color: var(--text); }
+.chat { flex: 1; min-width: 0; display: flex; flex-direction: column; background: var(--bg); }
 .header {
-  padding: 15px;
-  background: #2b2d31;
-  border-bottom: 1px solid #1e1f22;
+  min-height: 72px; padding: 0 26px; display: flex; align-items: center;
+  justify-content: space-between; border-bottom: 1px solid var(--line);
+  background: rgba(18, 20, 24, .88);
 }
-
-.dmView {
-  flex: 1;
-  display: flex;
-  overflow-y: auto;
-  flex-direction: column;
-}
-
-.friendsView {
-  flex: 1;
-  display: none;
-  flex-direction: column;
-}
-
+.header-main { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.header .avatar { width: 37px; height: 37px; margin: 0; }
+.header-title { font-size: 15px; font-weight: 700; }
+.header-subtitle { color: var(--muted); font-size: 11px; margin-top: 1px; }
+.header-actions { display: flex; gap: 5px; }
+.dmView { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .messages {
-  flex: 1;
-  padding: 15px;
+  flex: 1; min-height: 0; overflow-y: auto; padding: 25px max(24px, calc((100% - 900px) / 2));
+  scroll-behavior: smooth;
+}
+.message {
+  display: flex; gap: 12px; padding: 8px 10px; margin: 1px -10px;
+  border-radius: 9px; transition: background .12s;
+}
+.message:hover { background: #171a20; }
+.message .avatar { width: 36px; height: 36px; margin: 2px 0 0; flex: 0 0 auto; }
+.message-body { min-width: 0; flex: 1; }
+.message-meta { display: flex; align-items: baseline; gap: 9px; margin-bottom: 2px; }
+.message-author { font-weight: 700; font-size: 13px; }
+.message-time { color: #707887; font-size: 10px; }
+.message-text { color: #d8dbe2; white-space: pre-wrap; overflow-wrap: anywhere; }
+.message.compact { padding-top: 2px; padding-bottom: 2px; }
+.message.compact .avatar { visibility: hidden; }
+.message.compact .message-meta { display: none; }
+.message.compact .message-text { padding-top: 1px; }
+.empty-state {
+  height: 100%; min-height: 240px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center; color: var(--muted);
+}
+.empty-symbol {
+  width: 58px; height: 58px; border-radius: 18px; display: grid; place-items: center;
+  background: #211f31; color: #b6aaff; font-size: 25px; margin-bottom: 16px;
+}
+.empty-state h2 { color: var(--text); font-size: 18px; margin: 0 0 5px; }
+.empty-state p { max-width: 290px; margin: 0; }
+.input-wrap { padding: 12px 24px 20px; }
+.inputBar {
+  display: none; align-items: flex-end; gap: 10px; width: min(900px, 100%);
+  margin: 0 auto; padding: 9px 10px 9px 16px;
+  background: #1b1e24; border: 1px solid #303540; border-radius: 14px;
+  box-shadow: 0 8px 30px #00000020;
+}
+.inputBar:focus-within { border-color: #7468bb; }
+.inputBar textarea {
+  display: none; flex: 1; min-width: 0; max-height: 150px; min-height: 25px;
+  resize: none; border: 0; outline: 0; background: transparent;
+  color: var(--text); padding: 5px 0; line-height: 1.5;
+}
+.inputBar textarea::placeholder, .FriendSearch textarea::placeholder { color: #777f8d; }
+.send-button {
+  display: none; width: 36px; height: 36px; flex: 0 0 auto; border: 0;
+  border-radius: 10px; background: var(--accent); color: #171522;
+  font-size: 17px; font-weight: 800; cursor: pointer;
+}
+.send-button:hover { background: var(--accent-hover); }
+.friendsView {
+  flex: 1; min-height: 0; display: none; flex-direction: column;
+  width: min(900px, 100%); margin: 0 auto; padding: 34px 28px;
   overflow-y: auto;
 }
-
-.message {
-  display: flex;
-  margin-bottom: 10px;
+.friends-heading { margin-bottom: 22px; }
+.friends-heading h1 { margin: 0 0 5px; font-size: 23px; letter-spacing: -.6px; }
+.friends-heading p { color: var(--muted); margin: 0; }
+.friend-search {
+  display: flex; gap: 9px; padding: 8px; background: var(--panel-2);
+  border: 1px solid var(--line); border-radius: 12px; margin-bottom: 28px;
 }
-
-.msgContent {
-  margin-left: 10px;
-}
-
-/* INPUT */
-.inputBar {
-  padding: 10px;
-  background: #383a40;
-  display:none;
-  flex-direction: row;
-  width: 100%;
-  align-items: center;
-}
-
-.inputBar textarea {
-  display: none;
-  width: calc(100% - 60px);
-  padding: 10px;
-  border-radius: 6px;
-  border: none;
-  outline: none;
-  background: #1e1f22;
-  color: #fff;
-  min-width: 0;
-  resize: none;
-}
-
-.inputBar button {
-  display: none;
-  background: #5865f2;
-  color: #fff;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 6px;
-  cursor: pointer;
-  margin-left: 10px;
-  width: 40px;
-  height: 40px;
-  flex-shrink: 0;
-}
-
-.FriendSearch {
-  padding: 0px;
-  background: transparent;
-  display:flex;
-  flex-direction: row;
-  width: 100%;
-  align-items: center;
-}
-
 .FriendSearch textarea {
-  display: flex;
-  font-size: 15px;
-  width: calc(100% - 60px);
-  padding: 5px;
-  border-radius: 6px;
-  border: none;
-  outline: none;
-  background: #1e1f22;
-  color: #fff;
-  min-width: 0;
-  resize: none;
+  flex: 1; min-width: 0; min-height: 38px; max-height: 100px; resize: vertical;
+  border: 0; outline: 0; background: transparent; color: var(--text); padding: 9px;
 }
-
-.FriendSearch button {
-  display: flex;
-  background: #5865f2;
-  color: #fff;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 6px;
-  cursor: pointer;
-  margin-left: 10px;
-  width: 40px;
-  height: 40px;
-  flex-shrink: 0;
+.friend-search button {
+  width: 40px; border: 0; border-radius: 9px; background: var(--accent);
+  color: #171522; font-weight: 800; cursor: pointer;
 }
-
-.logoutbutton {
-  float: right;
-  background: #ff5252;
-  color: #fff;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 4px;
-  cursor: pointer;
+.pending-heading { color: var(--muted); font-size: 11px; font-weight: 750; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+#pendingList .dm { background: var(--panel); margin-bottom: 6px; }
+#pendingList .dm button {
+  margin-left: auto; border: 0; border-radius: 7px; padding: 7px 11px;
+  background: #2e2947; color: #c8bfff; cursor: pointer;
 }
-
+#pendingList .dm button:hover { background: #3a3359; }
+.logoutbutton { display: none; }
+.auth-screen {
+  min-height: 100vh; display: grid; place-items: center; padding: 24px;
+  background: radial-gradient(ellipse at 50% 5%, #292340 0, #15151d 42%, #101114 78%);
+}
+.auth-card {
+  width: min(390px, 100%); padding: 34px; border: 1px solid #30303d;
+  border-radius: 19px; background: #191a22; box-shadow: 0 24px 90px #0008;
+}
+.auth-brand { display: flex; justify-content: center; margin-bottom: 22px; }
+.auth-card h1 { text-align: center; font-size: 23px; margin: 0 0 6px; letter-spacing: -.7px; }
+.auth-card > p { text-align: center; color: var(--muted); margin: 0 0 25px; }
+.auth-card input {
+  width: 100%; padding: 12px 13px; margin-bottom: 11px; border-radius: 9px;
+  border: 1px solid #343743; background: #111319; color: var(--text); outline: 0;
+}
+.auth-card input:focus { border-color: #8174d1; }
+.auth-card button {
+  width: 100%; padding: 12px; margin-top: 9px; border-radius: 9px;
+  border: 1px solid transparent; background: var(--accent); color: #171522;
+  font-weight: 750; cursor: pointer;
+}
+.auth-card button.secondary { background: #252832; color: var(--soft); border-color: #363a45; }
+.auth-card button:hover { filter: brightness(1.08); }
+.auth-error { min-height: 18px; color: var(--danger); font-size: 12px; text-align: center; margin-top: 12px; }
+.avatar { object-fit: cover; border-radius: 50%; background: #282b35; }
+#avatarInput { display: none; }
+@media (max-width: 700px) {
+  .sidebar { width: 76px; min-width: 76px; padding: 16px 9px 12px; }
+  .brand { justify-content: center; padding: 0 0 22px; }
+  .brand-copy, .section-label, .side-action .side-text, .dm-name, .profile-info, .profile .icon-button { display: none; }
+  .side-action { justify-content: center; padding: 12px 0; }
+  .side-icon { font-size: 18px; }
+  .dm { justify-content: center; padding: 9px 0; }
+  .dm .avatar { margin: 0; }
+  .profile { justify-content: center; padding: 12px 0 0; }
+  .profile .avatar { width: 34px; height: 34px; }
+  .header { padding: 0 15px; min-height: 64px; }
+  .messages { padding: 18px 15px; }
+  .input-wrap { padding: 9px 12px 13px; }
+  .friendsView { padding: 25px 16px; }
+}
+@media (max-width: 420px) {
+  .sidebar { width: 62px; min-width: 62px; padding-left: 6px; padding-right: 6px; }
+  .brand-mark { width: 31px; height: 31px; }
+  .header-actions { display: none; }
+}
 </style>
 </head>
-
 <body>
+<div id="app" style="display:none;">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">v</div>
+      <div class="brand-copy">
+        <div class="brand-name">voxa</div>
+        <div class="brand-sub">just between us</div>
+      </div>
+    </div>
 
-<div id="app" style="display:none; width:100%; height:100%;">
-  <div class="sidebar">
-    <div class="sidebarheader">
-      <img id="avatarPreview" class="avatar" style="cursor:pointer;" title="Click to save avatar" />
-      <input type="file" id="avatarInput" accept="image/*" style="display:none;">
-      <span id="me"></span>
-      <button onclick="logout()" style="background:#ff1717;color:white;border:none;padding:5px 8px;border-radius:4px;cursor:pointer;">
-        Logout
+    <div class="side-section">
+      <button class="side-action" id="friendsButton" onclick="showFriends()">
+        <span class="side-icon">＋</span><span class="side-text">Find people</span>
       </button>
     </div>
-    <div><button class="sidebarbutton" onclick="showFriends()"><h2>Friends</h2></button></div>
-    <div><h3 style="color:#b5bac1;">Messages</h3></div>
-    <div id="dmList"></div>
-  </div>
 
-  <div class="chat">
-    <div class="header" id="chatHeader">Select a DM</div>
+    <div class="side-section">
+      <div class="section-label">Messages</div>
+      <div id="dmList"></div>
+    </div>
 
-    <div class="dmView" id="dmView">
-      <div class="messages" id="messages"></div>
-        <div class="inputBar" id="inputBg">
-          <textarea id="input" placeholder="Message..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" name="chatMessageRandom123"></textarea>
-          <button id="sendBtn" onclick="sendMessage()">➤</button>
+    <div class="sidebar-spacer"></div>
+    <div class="profile">
+      <img id="avatarPreview" class="avatar" title="Change avatar" src="/avatar/Vitality" alt="Your avatar">
+      <input type="file" id="avatarInput" accept="image/*">
+      <div class="profile-info">
+        <div id="me" class="profile-name">Account</div>
+        <div class="profile-hint">Your account</div>
+      </div>
+      <button class="icon-button" onclick="logout()" title="Log out" aria-label="Log out">↪</button>
+    </div>
+  </aside>
+
+  <main class="chat">
+    <header class="header">
+      <div class="header-main" id="headerMain">
+        <div>
+          <div class="header-title" id="chatHeader">Your messages</div>
+          <div class="header-subtitle" id="chatSubtitle">Select a conversation to get started</div>
         </div>
       </div>
-
-    <div class="friendsView" id="friendsView">
-      <div class="FriendSearch" style="padding:15px;">
-        <textarea id="addFriendInput" placeholder="Search friends..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" name="chatMessageRandom123"></textarea>
-        <button id="sendBtn" onclick="sendFriendRequest()">➤</button></div>
-        <div id="pendingList"></div>
+      <div class="header-actions">
+        <button class="icon-button" title="Messages are private">⌑</button>
       </div>
-  </div>
+    </header>
+
+    <section class="dmView" id="dmView" style="display:flex;">
+      <div class="messages" id="messages">
+        <div class="empty-state">
+          <div class="empty-symbol">✳</div>
+          <h2>Your space, your conversations.</h2>
+          <p>Pick someone from the sidebar to start talking.</p>
+        </div>
+      </div>
+      <div class="input-wrap">
+        <div class="inputBar" id="inputBg">
+          <textarea id="input" placeholder="Write a message…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" name="chatMessageRandom123" rows="1"></textarea>
+          <button class="send-button" id="sendBtn" onclick="sendMessage()" aria-label="Send message">↑</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="friendsView" id="friendsView">
+      <div class="friends-heading">
+        <h1>Find your people</h1>
+        <p>Add someone to start a private conversation.</p>
+      </div>
+      <div class="friend-search FriendSearch">
+        <textarea id="addFriendInput" placeholder="Enter a username…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" name="chatMessageRandom123" rows="1"></textarea>
+        <button id="friendSendBtn" onclick="sendFriendRequest()" aria-label="Send friend request">↑</button>
+      </div>
+      <div class="pending-heading">Incoming requests</div>
+      <div id="pendingList"></div>
+    </section>
+  </main>
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
-
 <script>
 const socket = io();
 
@@ -270,122 +322,91 @@ let chattingWith = null;
 let currentUser = null;
 let avatar = null;
 
-/* ===== AUTH ===== */
-
 async function checkAuth() {
-  const res = await fetch("/me");
-  const data = await res.json();
+  try {
+    const res = await fetch("/me");
+    const data = await res.json();
 
-  if (!data.user) {
-    showAuth();
-  } else {
-    currentUser = data.user.username;
-    avatar = `/avatar/${data.user.username}`; // CHANGED
-    document.getElementById("app").style.display = "flex";
-    startApp();
+    if (!data.user) {
+      showAuth();
+    } else {
+      currentUser = data.user.username;
+      avatar = `/avatar/${data.user.username}`;
+      document.getElementById("app").style.display = "flex";
+      startApp();
+    }
+  } catch (error) {
+    showAuth("Could not connect. Refresh and try again.");
   }
 }
 
-function showAuth() {
-document.body.innerHTML = `
-  <div style="
-    display: flex;
-    height: 100vh;
-    width: 100vw;
-    justify-content: center;
-    align-items: center;
-    background: #0d1117;
-    font-family: Arial, sans-serif;
-    color: #e6edf3;
-  ">
-    <div style="
-      width: 320px;
-      padding: 35px;
-      background: #161b22;
-      border: 1px solid #30363d;
-      border-radius: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    ">
-      <div style="text-align: center; margin-bottom: 10px;">
-        <h2 style="margin: 0 0 8px;">Welcome back</h2>
-        <p style="margin: 0; color: #8b949e; font-size: 14px;">
-          Login or create an account
-        </p>
-      </div>
+function showAuth(error = "") {
+  document.body.innerHTML = `
+    <main class="auth-screen">
+      <section class="auth-card">
+        <div class="auth-brand"><div class="brand-mark">v</div></div>
+        <h1>Welcome to Voxa</h1>
+        <p>A quieter place for your conversations.</p>
+        <input id="user" placeholder="Username" autocomplete="username">
+        <input id="pass" type="password" placeholder="Password" autocomplete="current-password">
+        <button onclick="login()">Log in</button>
+        <button class="secondary" onclick="register()">Create account</button>
+        <div class="auth-error" id="authError">${error}</div>
+      </section>
+    </main>
+  `;
+}
 
-      <input id="user" placeholder="Username" style="
-        padding: 13px;
-        border-radius: 7px;
-        border: 1px solid #30363d;
-        background: #0d1117;
-        color: white;
-        outline: none;
-      ">
-
-      <input id="pass" type="password" placeholder="Password" style="
-        padding: 13px;
-        border-radius: 7px;
-        border: 1px solid #30363d;
-        background: #0d1117;
-        color: white;
-        outline: none;
-      ">
-
-      <button onclick="login()" style="
-        padding: 12px;
-        background: #238636;
-        color: white;
-        border: none;
-        border-radius: 7px;
-        cursor: pointer;
-        font-weight: bold;
-      ">Login</button>
-
-      <button onclick="register()" style="
-        padding: 12px;
-        background: #21262d;
-        color: #e6edf3;
-        border: 1px solid #30363d;
-        border-radius: 7px;
-        cursor: pointer;
-      ">Create account</button>
-    </div>
-  </div>
-`;
+function setAuthError(message) {
+  const error = document.getElementById("authError");
+  if (error) error.textContent = message;
 }
 
 async function register() {
+  const username = document.getElementById("user").value;
+  const password = document.getElementById("pass").value;
 
-  if (!user.value || !pass.value) { alert("Invalid Username Or Password"); return; }
-  
-  await fetch("/register", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({
-      username: user.value,
-      password: pass.value
-    })
-  });
+  if (!username || !password) {
+    setAuthError("Enter a username and password first.");
+    return;
+  }
 
-  alert("registered");
+  try {
+    const res = await fetch("/register", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ username, password })
+    });
+
+    if (!res.ok) {
+      setAuthError("Could not register. Check the details and try again.");
+      return;
+    }
+
+    setAuthError("Account registered. You can log in now.");
+  } catch (error) {
+    setAuthError("Could not connect. Try again.");
+  }
 }
 
 async function login() {
-  const res = await fetch("/login", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({
-      username: user.value,
-      password: pass.value
-    })
-  });
+  const username = document.getElementById("user").value;
+  const password = document.getElementById("pass").value;
 
-  const data = await res.json();
+  try {
+    const res = await fetch("/login", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ username, password })
+    });
 
-  if (data.ok) location.reload();
-  else alert("login failed");
+    const data = await res.json();
+
+    if (data.ok) location.reload();
+    else setAuthError("Login failed. Check your username and password.");
+  } catch (error) {
+    setAuthError("Could not connect. Try again.");
+  }
 }
 
 async function logout() {
@@ -400,19 +421,30 @@ async function loadPending() {
   const requests = await res.json();
 
   const list = document.getElementById("pendingList");
-  list.innerHTML = "<h3>Pending Requests</h3>";
+  list.innerHTML = "";
 
-  requests.forEach(user => {
+  if (!requests.length) {
+    const empty = document.createElement("p");
+    empty.textContent = "No incoming requests right now.";
+    empty.style.color = "var(--muted)";
+    empty.style.padding = "8px 2px";
+    list.appendChild(empty);
+    return;
+  }
+
+  requests.forEach(username => {
     const div = document.createElement("div");
-    div.className = "dm"; // reuse your styling
+    div.className = "dm";
 
-    div.innerHTML = `
-      <span>${user}</span>
-      <button onclick="acceptFriend('${user}')">Accept</button>
-    `;
+    const name = document.createElement("span");
+    name.className = "dm-name";
+    name.textContent = username;
 
-    console.log("Pending request from:", user);
+    const accept = document.createElement("button");
+    accept.textContent = "Accept";
+    accept.onclick = () => acceptFriend(username);
 
+    div.append(name, accept);
     list.appendChild(div);
   });
 }
@@ -421,13 +453,11 @@ async function acceptFriend(username) {
   await fetch("/accept-friend", {
     method: "POST",
     headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
-      sender: username
-    })
+    body: JSON.stringify({ sender: username })
   });
 
   loadPending();
-  loadFriends(); // refresh friends
+  loadFriends();
 }
 
 async function sendFriendRequest() {
@@ -439,9 +469,7 @@ async function sendFriendRequest() {
   await fetch("/add-friend", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      receiver: friend
-    })
+    body: JSON.stringify({ receiver: friend })
   });
 
   input.value = "";
@@ -455,27 +483,32 @@ async function loadFriends() {
   list.innerHTML = "";
 
   friends.forEach(user => {
-  const div = document.createElement("div");
-  div.className = "dm";
+    const div = document.createElement("div");
+    div.className = "dm";
+    if (user.username === chattingWith) div.classList.add("active");
 
-  const avatar = user.avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${user.username}`;
+    const img = document.createElement("img");
+    img.className = "avatar";
+    img.src = user.avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(user.username)}`;
+    img.alt = "";
 
-  div.innerHTML = `
-    <img class="avatar" src="${avatar}" />
-    <span>${user.username}</span>
-  `;
+    const name = document.createElement("span");
+    name.className = "dm-name";
+    name.textContent = user.username;
 
-  div.onclick = () => openChat(user.username);
-
-  list.appendChild(div);
-});
+    div.append(img, name);
+    div.onclick = () => openChat(user.username);
+    list.appendChild(div);
+  });
 }
 
 function showFriends() {
   document.getElementById("dmView").style.display = "none";
   document.getElementById("friendsView").style.display = "flex";
-  document.getElementById("chatHeader").innerHTML = "Friends";
-
+  document.getElementById("chatHeader").textContent = "Find people";
+  document.getElementById("chatSubtitle").textContent = "Grow your circle";
+  document.getElementById("headerMain").querySelector(".avatar")?.remove();
+  document.getElementById("friendsButton").classList.add("active");
   loadPending();
 }
 
@@ -484,15 +517,28 @@ function showFriends() {
 function openChat(user) {
   chattingWith = user;
 
-  document.querySelectorAll(".dm").forEach(d => d.classList.remove("active"));
+  document.querySelectorAll("#dmList .dm").forEach(d => d.classList.remove("active"));
+  const active = [...document.querySelectorAll("#dmList .dm")].find(d => d.querySelector(".dm-name")?.textContent === user);
+  if (active) active.classList.add("active");
 
-  document.getElementById("chatHeader").innerHTML = user;
+  const headerMain = document.getElementById("headerMain");
+  headerMain.querySelector(".avatar")?.remove();
+
+  const headerAvatar = document.createElement("img");
+  headerAvatar.className = "avatar";
+  headerAvatar.src = `/avatar/${encodeURIComponent(user)}`;
+  headerAvatar.alt = "";
+  headerMain.prepend(headerAvatar);
+
+  document.getElementById("chatHeader").textContent = user;
+  document.getElementById("chatSubtitle").textContent = "Private conversation";
   document.getElementById("dmView").style.display = "flex";
   document.getElementById("friendsView").style.display = "none";
+  document.getElementById("friendsButton").classList.remove("active");
   document.getElementById("input").disabled = false;
   document.getElementById("inputBg").style.display = "flex";
   document.getElementById("input").style.display = "flex";
-  document.getElementById("sendBtn").style.display = "flex";
+  document.getElementById("sendBtn").style.display = "block";
   document.getElementById("input").focus();
 
   loadMessages();
@@ -510,62 +556,61 @@ function sendMessage() {
   });
 
   input.value = "";
+  input.style.height = "auto";
 }
 
 function startApp() {
-  document.getElementById("me").innerText = currentUser;
+  document.getElementById("me").textContent = currentUser;
 
   loadFriends();
-
   loadPending();
 
-  let avatarPreview = document.getElementById("avatarPreview");
-  let avatarInput = document.getElementById("avatarInput");
+  const avatarPreview = document.getElementById("avatarPreview");
+  const avatarInput = document.getElementById("avatarInput");
 
-  avatarPreview.src = avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${currentUser}`;
+  avatarPreview.src = avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(currentUser)}`;
 
-  avatarPreview.addEventListener("click", () => {
-    avatarInput.click();
-  });
+  avatarPreview.addEventListener("click", () => avatarInput.click());
 
   avatarInput.onchange = async () => {
-  const file = avatarInput.files[0];
-  if (!file) return;
+    const file = avatarInput.files[0];
+    if (!file) return;
 
-  // optional: preview instantly
-  avatarPreview.src = URL.createObjectURL(file);
+    avatarPreview.src = URL.createObjectURL(file);
 
-  const formData = new FormData();
-  formData.append("avatar", file);
+    const formData = new FormData();
+    formData.append("avatar", file);
 
-  await fetch("/set-avatar", {
-    method: "POST",
-    body: formData
-  });
+    await fetch("/set-avatar", {
+      method: "POST",
+      body: formData
+    });
 
-  console.log("uploaded");
-};
+    console.log("uploaded");
+  };
 
   document.getElementById("input").addEventListener("keydown", (e) => {
     if (e.key === "Enter" && chattingWith && !e.shiftKey) {
       e.preventDefault();
+      sendMessage();
+    }
+  });
 
-      const text = e.target.value.trim();
-      if (!text) return;
+  document.getElementById("input").addEventListener("input", (e) => {
+    e.target.style.height = "auto";
+    e.target.style.height = Math.min(e.target.scrollHeight, 150) + "px";
+  });
 
-      socket.emit("sendMessage", {
-        sender: currentUser,
-        to: chattingWith,
-        text
-      });
-
-      e.target.value = "";
+  document.getElementById("addFriendInput").addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendFriendRequest();
     }
   });
 }
 
 async function loadMessages() {
-  const res = await fetch("/messages?withUser=" + chattingWith);
+  const res = await fetch("/messages?withUser=" + encodeURIComponent(chattingWith));
   const data = await res.json();
 
   const box = document.getElementById("messages");
@@ -574,59 +619,63 @@ async function loadMessages() {
   data.forEach(addMessage);
 }
 
+function formatMessageTime(timestamp) {
+  const diff = Date.now() - timestamp;
+  const date = new Date(timestamp);
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+
+  if (diff < 60000) return "Just now";
+  if (diff < 3600000) return `${Math.floor(diff / 60000)} min ago`;
+  if (diff < 86400000) return `${Math.floor(diff / 3600000)} hr ago`;
+  if (diff < 172800000) return `Yesterday at ${hours}:${minutes}`;
+
+  const day = date.getDate().toString().padStart(2, "0");
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}, ${hours}:${minutes}`;
+}
+
 function addMessage(msg) {
   if (
     (msg.sender === currentUser && msg.receiver === chattingWith) ||
     (msg.sender === chattingWith && msg.receiver === currentUser)
   ) {
-    const div = document.createElement("div");
-    div.className = "message";
-    div.style.padding = "8px";
-
-   const diff = Date.now() - msg.timestamp;
-
-    const date = new Date(msg.timestamp);
-
-    const hours = date.getHours().toString().padStart(2, "0");
-    const minutes = date.getMinutes().toString().padStart(2, "0");
-
-    let time;
-
-    if (diff < 60000) {
-      time = "Just now";
-    }
-
-    else if (diff < 3600000) {
-      const mins = Math.floor(diff / 60000);
-      time = `${mins} min ago`;
-    }
-
-    else if (diff < 86400000) {
-     const hrs = Math.floor(diff / 3600000);
-     time = `${hrs} hr ago`;
-    }
-
-    else if (diff < 172800000) {
-      time = `Yesterday at ${hours}:${minutes}`;
-    }
-
-    else {
-      const day = date.getDate().toString().padStart(2, "0");
-      const month = (date.getMonth() + 1).toString().padStart(2, "0");
-      const year = date.getFullYear();
-
-      time = `${day}/${month}/${year}, ${hours}:${minutes}`;
-    }
-
-    div.innerHTML = `
-      <img class="avatar" src="${msg.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${msg.sender}`}" />
-      <div class="msgContent">
-        <div><b>${msg.sender}</b><span style="color:#888; font-size:12px; margin-left: 10px;">${time}</span></div>
-        <div>${msg.text}</div>
-      </div>
-    `;
-
     const box = document.getElementById("messages");
+    const previous = box.lastElementChild;
+    const compact = previous?.classList.contains("message") &&
+      previous.dataset.sender === msg.sender;
+
+    const div = document.createElement("div");
+    div.className = compact ? "message compact" : "message";
+    div.dataset.sender = msg.sender;
+
+    const img = document.createElement("img");
+    img.className = "avatar";
+    img.src = msg.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(msg.sender)}`;
+    img.alt = "";
+
+    const content = document.createElement("div");
+    content.className = "message-body";
+
+    const meta = document.createElement("div");
+    meta.className = "message-meta";
+
+    const author = document.createElement("span");
+    author.className = "message-author";
+    author.textContent = msg.sender;
+
+    const time = document.createElement("span");
+    time.className = "message-time";
+    time.textContent = formatMessageTime(msg.timestamp);
+
+    const text = document.createElement("div");
+    text.className = "message-text";
+    text.textContent = msg.text;
+
+    meta.append(author, time);
+    content.append(meta, text);
+    div.append(img, content);
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
   }
@@ -637,7 +686,5 @@ socket.on("newMessage", addMessage);
 /* ===== START ===== */
 checkAuth();
 </script>
-
-
 </body>
 </html>
