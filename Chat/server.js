@@ -284,9 +284,9 @@ app.get("/messages", async (req, res) => {
     SELECT messages.*, users.username as senderName
     FROM messages 
     JOIN users ON users.username = messages.sender
-    WHERE (sender=$1 AND receiver=$2) 
-       OR (sender=$2 AND receiver=$1)
-       AND messages.timestamp >= $3
+    WHERE ( (sender=$1 AND receiver=$2) 
+       OR (sender=$2 AND receiver=$1) )
+    AND messages.timestamp >= $3
   `, [user, withUser, Date.now() - WEEK]);
 
   const fixed = rows.map(r => ({
