@@ -17,7 +17,8 @@
   --muted: #858c99;
   --soft: #b7bdc8;
   --accent: #9b8cff;
-  --accent-hover: #ad9fff;\n  --accent-soft: color-mix(in srgb, var(--accent) 18%, transparent);
+  --accent-hover: #ad9fff;
+  --accent-soft: color-mix(in srgb, var(--accent) 18%, transparent);
   --danger: #f06b78;
   --radius: 13px;
 }
@@ -58,8 +59,9 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
   background: linear-gradient(145deg, #c0b5ff, #8270ee);
   box-shadow: 0 5px 20px #8d7af02b;
 }
-.brand-name { font-size: 17px; font-weight: 750; letter-spacing: -.5px; }
-.brand-sub { color: var(--muted); font-size: 11px; margin-top: -2px; }
+.brand-name { font-size: 21px; font-weight: 800; letter-spacing: -1.1px; line-height: 1.05; }
+.brand-period { color: var(--accent); }
+.brand-sub { color: var(--muted); font-size: 10px; margin-top: 4px; letter-spacing: .15px; }
 .side-section { margin-top: 8px; }
 .section-label {
   display: flex; justify-content: space-between; align-items: center;
@@ -83,7 +85,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 }
 .dm:hover { background: #20232a; }
 .dm.active { background: color-mix(in srgb, var(--accent) 18%, #1b1e24); color: var(--text); }
-.dm .avatar { width: 34px; height: 34px; margin: 0; flex: 0 0 auto; }
+.dm .avatar, img.avatar { display: block; width: 36px; height: 36px; object-fit: cover; border-radius: 50% !important; overflow: hidden; background: #282b35; }
 .dm-name { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-weight: 550; }
 .sidebar-spacer { flex: 1; }
 .profile {
@@ -124,7 +126,10 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 .message-body { min-width: 0; flex: 1; }
 .message-meta { display: flex; align-items: baseline; gap: 9px; margin-bottom: 2px; }
 .message-author { font-weight: 700; font-size: 13px; }
-.message-time { color: #707887; font-size: 10px; }\n.hide-timestamps .message-time { display: none; }\nhtml.reduce-motion *, html.reduce-motion *::before, html.reduce-motion *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+.message-time { color: #707887; font-size: 10px; }
+html.hide-timestamps .message-time { display: none !important; }
+.hide-timestamps .message-time { display: none; }
+html.reduce-motion *, html.reduce-motion *::before, html.reduce-motion *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
 .message-text { color: #d8dbe2; white-space: pre-wrap; overflow-wrap: anywhere; }
 .message.compact { padding-top: 2px; padding-bottom: 2px; }
 .message.compact .avatar { visibility: hidden; }
@@ -188,30 +193,56 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 }
 #pendingList .dm button:hover { background: color-mix(in srgb, var(--accent) 30%, #1b1e24); }
 .logoutbutton { display: none; }
+
 .auth-screen {
-  min-height: 100vh; display: grid; place-items: center; padding: 24px;
-  background: radial-gradient(ellipse at 50% 5%, #292340 0, #15151d 42%, #101114 78%);
+  min-height: 100vh; display: grid; place-items: center; padding: 26px;
+  background: #101114;
 }
 .auth-card {
-  width: min(390px, 100%); padding: 34px; border: 1px solid #30303d;
-  border-radius: 19px; background: #191a22; box-shadow: 0 24px 90px #0008;
+  width: min(410px, 100%); padding: 35px 36px 30px;
+  border: 1px solid #2b2e37; border-radius: 13px;
+  background: #15171c; box-shadow: 0 18px 55px #0005;
 }
-.auth-brand { display: flex; justify-content: center; margin-bottom: 22px; }
-.auth-card h1 { text-align: center; font-size: 23px; margin: 0 0 6px; letter-spacing: -.7px; }
-.auth-card > p { text-align: center; color: var(--muted); margin: 0 0 25px; }
+.auth-brand {
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 0 30px; color: var(--text);
+  font-size: 29px; font-weight: 850; letter-spacing: -1.8px;
+}
+.auth-brand .brand-period { color: var(--accent); }
+.auth-card h1 {
+  text-align: center; font-size: 22px; font-weight: 700;
+  margin: 0 0 6px; letter-spacing: -.65px;
+}
+.auth-card > p { text-align: center; color: var(--muted); margin: 0 0 23px; }
+.auth-tabs {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
+  padding: 4px; margin-bottom: 19px; border-radius: 8px;
+  background: #101216; border: 1px solid #292d36;
+}
+.auth-tabs button {
+  padding: 9px; border: 0; border-radius: 6px;
+  color: var(--muted); background: transparent; font-weight: 650; cursor: pointer;
+}
+.auth-tabs button.active { color: var(--text); background: #292d36; }
 .auth-card input {
-  width: 100%; padding: 12px 13px; margin-bottom: 11px; border-radius: 9px;
-  border: 1px solid #343743; background: #111319; color: var(--text); outline: 0;
+  width: 100%; padding: 12px 13px; margin-bottom: 11px;
+  border-radius: 7px; border: 1px solid #343843;
+  background: #101216; color: var(--text); outline: 0;
 }
 .auth-card input:focus { border-color: var(--accent); }
-.auth-card button {
-  width: 100%; padding: 12px; margin-top: 9px; border-radius: 9px;
-  border: 1px solid transparent; background: var(--accent); color: #171522;
+.auth-submit {
+  width: 100%; padding: 12px; margin-top: 5px; border-radius: 7px;
+  border: 1px solid var(--accent); background: var(--accent); color: #171522;
   font-weight: 750; cursor: pointer;
 }
-.auth-card button.secondary { background: #252832; color: var(--soft); border-color: #363a45; }
-.auth-card button:hover { filter: brightness(1.08); }
-.auth-error { min-height: 18px; color: var(--danger); font-size: 12px; text-align: center; margin-top: 12px; }
+.auth-submit:hover { filter: brightness(1.08); }
+.auth-error {
+  min-height: 18px; color: var(--danger); font-size: 12px;
+  text-align: center; margin-top: 13px;
+}
+.auth-note {
+  margin-top: 23px; text-align: center; color: #6f7581; font-size: 11px;
+}
 
 .settingsView {
   display: none; flex: 1; min-height: 0; overflow-y: auto;
@@ -258,7 +289,8 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 .setting-toggle:checked { background: var(--accent); border-color: var(--accent); }
 .setting-toggle:checked::after { transform: translateX(16px); background: #171522; }
 .settings-footnote { color: var(--muted); font-size: 11px; margin: 4px 2px; }
-\n.avatar { object-fit: cover; border-radius: 50%; background: #282b35; }
+
+.avatar { object-fit: cover; border-radius: 50%; background: #282b35; }
 #avatarInput { display: none; }
 @media (max-width: 700px) {
   .sidebar { width: 76px; min-width: 76px; padding: 16px 9px 12px; }
@@ -289,9 +321,8 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 <div id="app" style="display:none;">
   <aside class="sidebar">
     <div class="brand">
-      <div class="brand-mark">v</div>
       <div class="brand-copy">
-        <div class="brand-name">voxa</div>
+        <div class="brand-name">voxa<span class="brand-period">.</span></div>
         <div class="brand-sub">just between us</div>
       </div>
     </div>
@@ -452,7 +483,7 @@ function applySettings() {
     `color-mix(in srgb, ${settings.accentColor} 82%, white)`
   );
   document.documentElement.classList.toggle("reduce-motion", settings.reduceMotion);
-  document.body.classList.toggle("hide-timestamps", !settings.showTimestamps);
+  document.documentElement.classList.toggle("hide-timestamps", !settings.showTimestamps);
 
   const accentInput = document.getElementById("accentColor");
   const enterInput = document.getElementById("enterToSend");
@@ -512,23 +543,48 @@ async function checkAuth() {
   }
 }
 
+let authMode = "login";
+
 function showAuth(error = "") {
   document.body.innerHTML = `
     <main class="auth-screen">
       <section class="auth-card">
-        <div class="auth-brand"><div class="brand-mark">v</div></div>
-        <h1>Welcome to Voxa</h1>
-        <p>A quieter place for your conversations.</p>
+        <div class="auth-brand">voxa<span class="brand-period">.</span></div>
+        <h1 id="authHeading">Welcome back.</h1>
+        <p id="authDescription">Sign in to pick up where you left off.</p>
+        <div class="auth-tabs">
+          <button id="loginTab" class="active" onclick="setAuthMode('login')">Sign in</button>
+          <button id="registerTab" onclick="setAuthMode('register')">Create account</button>
+        </div>
         <input id="user" placeholder="Username" autocomplete="username">
         <input id="pass" type="password" placeholder="Password" autocomplete="current-password">
-        <button onclick="login()">Log in</button>
-        <button class="secondary" onclick="register()">Create account</button>
+        <button class="auth-submit" id="authSubmit" onclick="login()">Sign in</button>
         <div class="auth-error" id="authError">${error}</div>
+        <div class="auth-note">Private conversations. No noise.</div>
       </section>
     </main>
   `;
+  setAuthMode(authMode);
 }
 
+function setAuthMode(mode) {
+  authMode = mode;
+  const loginMode = mode === "login";
+
+  document.getElementById("authHeading").textContent =
+    loginMode ? "Welcome back." : "Make yourself at home.";
+  document.getElementById("authDescription").textContent =
+    loginMode ? "Sign in to pick up where you left off." : "Create an account to start your conversations.";
+  document.getElementById("authSubmit").textContent =
+    loginMode ? "Sign in" : "Create account";
+  document.getElementById("authSubmit").onclick =
+    loginMode ? login : register;
+  document.getElementById("loginTab").classList.toggle("active", loginMode);
+  document.getElementById("registerTab").classList.toggle("active", !loginMode);
+  document.getElementById("pass").autocomplete =
+    loginMode ? "current-password" : "new-password";
+  setAuthError("");
+}
 function setAuthError(message) {
   const error = document.getElementById("authError");
   if (error) error.textContent = message;
@@ -555,7 +611,8 @@ async function register() {
       return;
     }
 
-    setAuthError("Account registered. You can log in now.");
+    setAuthMode("login");
+    setAuthError("Account created. You can sign in now.");
   } catch (error) {
     setAuthError("Could not connect. Try again.");
   }
