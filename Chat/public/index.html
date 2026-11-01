@@ -357,7 +357,7 @@ document.body.innerHTML = `
 
 async function register() {
 
-  if (!user.value || !pass.value) alert("Invalid Username Or Password") return;
+  if (!user.value || !pass.value) { alert("Invalid Username Or Password"); return; }
   
   await fetch("/register", {
     method: "POST",
