@@ -16,8 +16,8 @@
   --text: #eef0f4;
   --muted: #858c99;
   --soft: #b7bdc8;
-  --accent: #a99b83;
-  --accent-hover: #b9aa91;
+  --accent: #9b8cff;
+  --accent-hover: #ad9fff;\n  --accent-soft: color-mix(in srgb, var(--accent) 18%, transparent);
   --danger: #f06b78;
   --radius: 13px;
 }
@@ -73,7 +73,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
   transition: background .15s, color .15s;
 }
 .side-action:hover, .side-action.active { background: var(--panel-3); color: var(--text); }
-.side-action.active { box-shadow: inset 2px 0 #a99b83; }
+.side-action.active { box-shadow: inset 2px 0 var(--accent); }
 .side-icon { width: 20px; text-align: center; color: var(--muted); font-size: 16px; }
 #dmList { display: flex; flex-direction: column; gap: 3px; overflow-y: auto; }
 .dm {
@@ -82,7 +82,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
   cursor: pointer; color: var(--soft); transition: background .15s;
 }
 .dm:hover { background: #20232a; }
-.dm.active { background: #292822; color: var(--text); }
+.dm.active { background: color-mix(in srgb, var(--accent) 18%, #1b1e24); color: var(--text); }
 .dm .avatar { width: 34px; height: 34px; margin: 0; flex: 0 0 auto; }
 .dm-name { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-weight: 550; }
 .sidebar-spacer { flex: 1; }
@@ -124,7 +124,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 .message-body { min-width: 0; flex: 1; }
 .message-meta { display: flex; align-items: baseline; gap: 9px; margin-bottom: 2px; }
 .message-author { font-weight: 700; font-size: 13px; }
-.message-time { color: #707887; font-size: 10px; }
+.message-time { color: #707887; font-size: 10px; }\n.hide-timestamps .message-time { display: none; }\nhtml.reduce-motion *, html.reduce-motion *::before, html.reduce-motion *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
 .message-text { color: #d8dbe2; white-space: pre-wrap; overflow-wrap: anywhere; }
 .message.compact { padding-top: 2px; padding-bottom: 2px; }
 .message.compact .avatar { visibility: hidden; }
@@ -136,7 +136,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 }
 .empty-symbol {
   width: 58px; height: 58px; border-radius: 18px; display: grid; place-items: center;
-  background: #292822; color: #c4b79f; font-size: 25px; margin-bottom: 16px;
+  background: color-mix(in srgb, var(--accent) 18%, #15171c); color: var(--accent); font-size: 25px; margin-bottom: 16px;
 }
 .empty-state h2 { color: var(--text); font-size: 18px; margin: 0 0 5px; }
 .empty-state p { max-width: 290px; margin: 0; }
@@ -144,10 +144,10 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 .inputBar {
   display: none; align-items: flex-end; gap: 10px; width: min(900px, 100%);
   margin: 0 auto; padding: 9px 10px 9px 16px;
-  background: #1b1e24; border: 1px solid #303540; border-radius: 8px;
-  box-shadow: none;
+  background: #1b1e24; border: 1px solid #303540; border-radius: 14px;
+  box-shadow: 0 8px 30px #00000020;
 }
-.inputBar:focus-within { border-color: #7468bb; }
+.inputBar:focus-within { border-color: var(--accent); }
 .inputBar textarea {
   display: none; flex: 1; min-width: 0; max-height: 150px; min-height: 25px;
   resize: none; border: 0; outline: 0; background: transparent;
@@ -184,55 +184,81 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 #pendingList .dm { background: var(--panel); margin-bottom: 6px; }
 #pendingList .dm button {
   margin-left: auto; border: 0; border-radius: 7px; padding: 7px 11px;
-  background: #2e2947; color: #c8bfff; cursor: pointer;
+  background: color-mix(in srgb, var(--accent) 22%, #1b1e24); color: var(--accent); cursor: pointer;
 }
-#pendingList .dm button:hover { background: #3a3359; }
+#pendingList .dm button:hover { background: color-mix(in srgb, var(--accent) 30%, #1b1e24); }
 .logoutbutton { display: none; }
 .auth-screen {
-  min-height: 100vh; display: grid; place-items: center; padding: 28px;
-  background: #111214;
+  min-height: 100vh; display: grid; place-items: center; padding: 24px;
+  background: radial-gradient(ellipse at 50% 5%, #292340 0, #15151d 42%, #101114 78%);
 }
 .auth-card {
-  width: min(420px, 100%); padding: 38px 40px 34px;
-  border: 1px solid #303137; border-radius: 10px;
-  background: #17181b; box-shadow: none;
+  width: min(390px, 100%); padding: 34px; border: 1px solid #30303d;
+  border-radius: 19px; background: #191a22; box-shadow: 0 24px 90px #0008;
 }
-.auth-brand {
-  display: block; margin-bottom: 42px; text-align: left;
-  color: #eeeae2; font-size: 25px; font-weight: 700; letter-spacing: -1.2px;
-}
-.auth-brand::after {
-  content: " / private conversations";
-  color: #777a80; font-size: 12px; font-weight: 400; letter-spacing: 0;
-}
-.auth-brand .brand-mark { display: none; }
-.auth-card h1 {
-  text-align: left; font-size: 24px; font-weight: 650;
-  margin: 0 0 7px; letter-spacing: -.7px;
-}
-.auth-card > p {
-  text-align: left; color: #92949a; margin: 0 0 28px;
-}
+.auth-brand { display: flex; justify-content: center; margin-bottom: 22px; }
+.auth-card h1 { text-align: center; font-size: 23px; margin: 0 0 6px; letter-spacing: -.7px; }
+.auth-card > p { text-align: center; color: var(--muted); margin: 0 0 25px; }
 .auth-card input {
-  width: 100%; padding: 13px 12px; margin-bottom: 12px;
-  border-radius: 6px; border: 1px solid #383a40;
-  background: #111214; color: var(--text); outline: 0;
+  width: 100%; padding: 12px 13px; margin-bottom: 11px; border-radius: 9px;
+  border: 1px solid #343743; background: #111319; color: var(--text); outline: 0;
 }
-.auth-card input:focus { border-color: #a99b83; }
+.auth-card input:focus { border-color: var(--accent); }
 .auth-card button {
-  width: 100%; padding: 12px; margin-top: 10px; border-radius: 6px;
-  border: 1px solid #b7a98f; background: #b7a98f; color: #171613;
-  font-weight: 650; cursor: pointer;
+  width: 100%; padding: 12px; margin-top: 9px; border-radius: 9px;
+  border: 1px solid transparent; background: var(--accent); color: #171522;
+  font-weight: 750; cursor: pointer;
 }
-.auth-card button.secondary {
-  background: transparent; color: #c6c4be; border-color: #3b3d42;
+.auth-card button.secondary { background: #252832; color: var(--soft); border-color: #363a45; }
+.auth-card button:hover { filter: brightness(1.08); }
+.auth-error { min-height: 18px; color: var(--danger); font-size: 12px; text-align: center; margin-top: 12px; }
+
+.settingsView {
+  display: none; flex: 1; min-height: 0; overflow-y: auto;
+  width: min(820px, 100%); margin: 0 auto; padding: 34px 28px;
 }
-.auth-card button:hover { filter: brightness(1.06); }
-.auth-error {
-  min-height: 18px; color: var(--danger); font-size: 12px;
-  text-align: left; margin-top: 15px;
+.settings-heading { margin-bottom: 28px; }
+.settings-heading h1 { margin: 0 0 5px; font-size: 23px; letter-spacing: -.6px; }
+.settings-heading p { color: var(--muted); margin: 0; }
+.settings-group {
+  margin-bottom: 22px; padding: 5px 17px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
 }
-.avatar { object-fit: cover; border-radius: 50%; background: #282b35; }
+.settings-group-title {
+  padding: 13px 0 8px; color: var(--muted); font-size: 10px;
+  font-weight: 750; letter-spacing: 1.1px; text-transform: uppercase;
+}
+.setting-row {
+  min-height: 66px; display: flex; align-items: center; justify-content: space-between;
+  gap: 18px; padding: 12px 0; border-top: 1px solid var(--line);
+  cursor: pointer;
+}
+.setting-copy { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.setting-name { color: var(--text); font-weight: 600; }
+.setting-description { color: var(--muted); font-size: 12px; }
+.color-control { display: flex; align-items: center; gap: 12px; flex: 0 0 auto; }
+.color-control input[type="color"] {
+  width: 38px; height: 34px; padding: 3px; border: 1px solid var(--line);
+  border-radius: 8px; background: var(--panel-2); cursor: pointer;
+}
+.text-button {
+  border: 0; background: transparent; color: var(--accent);
+  font-size: 12px; font-weight: 650; cursor: pointer;
+}
+.text-button:hover { color: var(--accent-hover); }
+.setting-toggle {
+  appearance: none; width: 38px; height: 22px; flex: 0 0 auto;
+  border: 1px solid #454956; border-radius: 20px; background: #30343d;
+  position: relative; cursor: pointer; transition: background .15s, border-color .15s;
+}
+.setting-toggle::after {
+  content: ""; position: absolute; width: 16px; height: 16px; left: 2px; top: 2px;
+  border-radius: 50%; background: #c4c8d0; transition: transform .15s;
+}
+.setting-toggle:checked { background: var(--accent); border-color: var(--accent); }
+.setting-toggle:checked::after { transform: translateX(16px); background: #171522; }
+.settings-footnote { color: var(--muted); font-size: 11px; margin: 4px 2px; }
+\n.avatar { object-fit: cover; border-radius: 50%; background: #282b35; }
 #avatarInput { display: none; }
 @media (max-width: 700px) {
   .sidebar { width: 76px; min-width: 76px; padding: 16px 9px 12px; }
@@ -248,9 +274,13 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
   .messages { padding: 18px 15px; }
   .input-wrap { padding: 9px 12px 13px; }
   .friendsView { padding: 25px 16px; }
+  .settingsView { padding: 25px 16px; }
+  .setting-row { gap: 10px; }
+  .setting-description { max-width: 250px; }
 }
 @media (max-width: 420px) {
   .sidebar { width: 62px; min-width: 62px; padding-left: 6px; padding-right: 6px; }
+  .brand-mark { width: 31px; height: 31px; }
   .header-actions { display: none; }
 }
 </style>
@@ -259,16 +289,19 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 <div id="app" style="display:none;">
   <aside class="sidebar">
     <div class="brand">
-      
+      <div class="brand-mark">v</div>
       <div class="brand-copy">
         <div class="brand-name">voxa</div>
-        <div class="brand-sub">private conversations</div>
+        <div class="brand-sub">just between us</div>
       </div>
     </div>
 
     <div class="side-section">
       <button class="side-action" id="friendsButton" onclick="showFriends()">
         <span class="side-icon">＋</span><span class="side-text">Find people</span>
+      </button>
+      <button class="side-action" id="settingsButton" onclick="showSettings()">
+        <span class="side-icon">⚙</span><span class="side-text">Settings</span>
       </button>
     </div>
 
@@ -328,6 +361,57 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
       <div class="pending-heading">Incoming requests</div>
       <div id="pendingList"></div>
     </section>
+
+    <section class="settingsView" id="settingsView">
+      <div class="settings-heading">
+        <h1>Settings</h1>
+        <p>Make Voxa feel a little more like yours.</p>
+      </div>
+
+      <div class="settings-group">
+        <div class="settings-group-title">Customise</div>
+        <div class="setting-row setting-color-row">
+          <div class="setting-copy">
+            <div class="setting-name">Accent colour</div>
+            <div class="setting-description">Change the colour used for highlights, active items and buttons.</div>
+          </div>
+          <div class="color-control">
+            <input id="accentColor" type="color" value="#9b8cff" aria-label="Accent colour">
+            <button class="text-button" onclick="resetAccentColor()">Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <div class="settings-group-title">Messages</div>
+        <label class="setting-row">
+          <span class="setting-copy">
+            <span class="setting-name">Press Enter to send</span>
+            <span class="setting-description">Use Shift + Enter to add a new line.</span>
+          </span>
+          <input class="setting-toggle" id="enterToSend" type="checkbox" checked>
+        </label>
+        <label class="setting-row">
+          <span class="setting-copy">
+            <span class="setting-name">Show message timestamps</span>
+            <span class="setting-description">Show when each message was sent.</span>
+          </span>
+          <input class="setting-toggle" id="showTimestamps" type="checkbox" checked>
+        </label>
+      </div>
+
+      <div class="settings-group">
+        <div class="settings-group-title">Interface</div>
+        <label class="setting-row">
+          <span class="setting-copy">
+            <span class="setting-name">Reduce animations</span>
+            <span class="setting-description">Keep transitions and scrolling effects to a minimum.</span>
+          </span>
+          <input class="setting-toggle" id="reduceMotion" type="checkbox">
+        </label>
+      </div>
+      <p class="settings-footnote">Settings are saved on this device.</p>
+    </section>
   </main>
 </div>
 
@@ -338,6 +422,77 @@ const socket = io();
 let chattingWith = null;
 let currentUser = null;
 let avatar = null;
+
+const DEFAULT_ACCENT = "#9b8cff";
+const SETTINGS_KEY = "voxa-settings";
+const defaultSettings = {
+  accentColor: DEFAULT_ACCENT,
+  enterToSend: true,
+  showTimestamps: true,
+  reduceMotion: false
+};
+let settings = loadSettings();
+
+function loadSettings() {
+  try {
+    return { ...defaultSettings, ...JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}") };
+  } catch {
+    return { ...defaultSettings };
+  }
+}
+
+function saveSettings() {
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+}
+
+function applySettings() {
+  document.documentElement.style.setProperty("--accent", settings.accentColor);
+  document.documentElement.style.setProperty(
+    "--accent-hover",
+    `color-mix(in srgb, ${settings.accentColor} 82%, white)`
+  );
+  document.documentElement.classList.toggle("reduce-motion", settings.reduceMotion);
+  document.body.classList.toggle("hide-timestamps", !settings.showTimestamps);
+
+  const accentInput = document.getElementById("accentColor");
+  const enterInput = document.getElementById("enterToSend");
+  const timestampsInput = document.getElementById("showTimestamps");
+  const motionInput = document.getElementById("reduceMotion");
+
+  if (accentInput) accentInput.value = settings.accentColor;
+  if (enterInput) enterInput.checked = settings.enterToSend;
+  if (timestampsInput) timestampsInput.checked = settings.showTimestamps;
+  if (motionInput) motionInput.checked = settings.reduceMotion;
+}
+
+function setAccentColor(value) {
+  settings.accentColor = value;
+  saveSettings();
+  applySettings();
+}
+
+function resetAccentColor() {
+  setAccentColor(DEFAULT_ACCENT);
+}
+
+function showSettings() {
+  document.getElementById("dmView").style.display = "none";
+  document.getElementById("friendsView").style.display = "none";
+  document.getElementById("settingsView").style.display = "block";
+  document.getElementById("chatHeader").textContent = "Settings";
+  document.getElementById("chatSubtitle").textContent = "Customise your Voxa experience";
+  document.getElementById("headerMain").querySelector(".avatar")?.remove();
+  document.getElementById("friendsButton").classList.remove("active");
+  document.getElementById("settingsButton").classList.add("active");
+  applySettings();
+}
+
+function showChatHome() {
+  document.getElementById("settingsView").style.display = "none";
+  document.getElementById("friendsView").style.display = "none";
+  document.getElementById("dmView").style.display = "flex";
+  document.getElementById("settingsButton").classList.remove("active");
+}
 
 async function checkAuth() {
   try {
@@ -361,13 +516,13 @@ function showAuth(error = "") {
   document.body.innerHTML = `
     <main class="auth-screen">
       <section class="auth-card">
-        <div class="auth-brand">voxa</div>
-        <h1>Sign in</h1>
-        <p>Your conversations, without the noise.</p>
+        <div class="auth-brand"><div class="brand-mark">v</div></div>
+        <h1>Welcome to Voxa</h1>
+        <p>A quieter place for your conversations.</p>
         <input id="user" placeholder="Username" autocomplete="username">
         <input id="pass" type="password" placeholder="Password" autocomplete="current-password">
-        <button onclick="login()">Continue</button>
-        <button class="secondary" onclick="register()">Create an account</button>
+        <button onclick="login()">Log in</button>
+        <button class="secondary" onclick="register()">Create account</button>
         <div class="auth-error" id="authError">${error}</div>
       </section>
     </main>
@@ -521,11 +676,13 @@ async function loadFriends() {
 
 function showFriends() {
   document.getElementById("dmView").style.display = "none";
+  document.getElementById("settingsView").style.display = "none";
   document.getElementById("friendsView").style.display = "flex";
   document.getElementById("chatHeader").textContent = "Find people";
   document.getElementById("chatSubtitle").textContent = "Grow your circle";
   document.getElementById("headerMain").querySelector(".avatar")?.remove();
   document.getElementById("friendsButton").classList.add("active");
+  document.getElementById("settingsButton").classList.remove("active");
   loadPending();
 }
 
@@ -533,6 +690,7 @@ function showFriends() {
 
 function openChat(user) {
   chattingWith = user;
+  showChatHome();
 
   document.querySelectorAll("#dmList .dm").forEach(d => d.classList.remove("active"));
   const active = [...document.querySelectorAll("#dmList .dm")].find(d => d.querySelector(".dm-name")?.textContent === user);
@@ -551,7 +709,9 @@ function openChat(user) {
   document.getElementById("chatSubtitle").textContent = "Private conversation";
   document.getElementById("dmView").style.display = "flex";
   document.getElementById("friendsView").style.display = "none";
+  document.getElementById("settingsView").style.display = "none";
   document.getElementById("friendsButton").classList.remove("active");
+  document.getElementById("settingsButton").classList.remove("active");
   document.getElementById("input").disabled = false;
   document.getElementById("inputBg").style.display = "flex";
   document.getElementById("input").style.display = "flex";
@@ -578,6 +738,25 @@ function sendMessage() {
 
 function startApp() {
   document.getElementById("me").textContent = currentUser;
+  applySettings();
+
+  document.getElementById("accentColor").addEventListener("input", (event) => {
+    setAccentColor(event.target.value);
+  });
+  document.getElementById("enterToSend").addEventListener("change", (event) => {
+    settings.enterToSend = event.target.checked;
+    saveSettings();
+  });
+  document.getElementById("showTimestamps").addEventListener("change", (event) => {
+    settings.showTimestamps = event.target.checked;
+    saveSettings();
+    applySettings();
+  });
+  document.getElementById("reduceMotion").addEventListener("change", (event) => {
+    settings.reduceMotion = event.target.checked;
+    saveSettings();
+    applySettings();
+  });
 
   loadFriends();
   loadPending();
@@ -607,7 +786,7 @@ function startApp() {
   };
 
   document.getElementById("input").addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && chattingWith && !e.shiftKey) {
+    if (e.key === "Enter" && chattingWith && settings.enterToSend && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
     }
