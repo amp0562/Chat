@@ -873,6 +873,7 @@ async function loadMessages() {
 }
 
 function formatMessageTime(timestamp) {
+  timestamp = Number(timestamp)
   const diff = Date.now() - timestamp;
   const date = new Date(timestamp);
   const hours = date.getHours().toString().padStart(2, "0");
